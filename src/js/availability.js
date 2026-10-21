@@ -2,33 +2,65 @@
  * Availability & Schedule Management Module
  * 
  * Defines the core structure of coaching availability:
- * - Weekdays (Dias úteis): Monday to Friday
- * - Weekends (Fins de semana): Saturday and Sunday
+ * - Days: Weekdays (Monday to Friday) and Weekends (Saturday and Sunday)
+ * - Daily Time Periods: Morning, Midday, Afternoon, Late Afternoon
  */
+
+export const TIME_PERIODS_CONFIG = [
+  {
+    id: 'morning',
+    name: 'Morning',
+    timeWindow: '08:00 – 12:00',
+    description: 'Early morning & mid-morning coaching sessions',
+    appliesTo: ['weekdays', 'weekends']
+  },
+  {
+    id: 'midday',
+    name: 'Midday',
+    timeWindow: '12:00 – 14:00',
+    description: 'Lunchtime & midday sessions',
+    appliesTo: ['weekdays', 'weekends']
+  },
+  {
+    id: 'afternoon',
+    name: 'Afternoon',
+    timeWindow: '14:00 – 17:00',
+    description: 'Afternoon coaching blocks',
+    appliesTo: ['weekdays', 'weekends']
+  },
+  {
+    id: 'late_afternoon',
+    name: 'Late Afternoon',
+    timeWindow: '17:00 – 20:00',
+    description: 'Post-work, evening & twilight floodlit sessions',
+    appliesTo: ['weekdays', 'weekends']
+  }
+];
 
 export const DAYS_CONFIG = {
   weekdays: [
-    { id: 'monday', name: 'Monday', labelPt: 'Segunda-feira', type: 'weekday', active: true },
-    { id: 'tuesday', name: 'Tuesday', labelPt: 'Terça-feira', type: 'weekday', active: true },
-    { id: 'wednesday', name: 'Wednesday', labelPt: 'Quarta-feira', type: 'weekday', active: true },
-    { id: 'thursday', name: 'Thursday', labelPt: 'Quinta-feira', type: 'weekday', active: true },
-    { id: 'friday', name: 'Friday', labelPt: 'Sexta-feira', type: 'weekday', active: true }
+    { id: 'monday', name: 'Monday', short: 'Mon', type: 'Weekday', active: true },
+    { id: 'tuesday', name: 'Tuesday', short: 'Tue', type: 'Weekday', active: true },
+    { id: 'wednesday', name: 'Wednesday', short: 'Wed', type: 'Weekday', active: true },
+    { id: 'thursday', name: 'Thursday', short: 'Thu', type: 'Weekday', active: true },
+    { id: 'friday', name: 'Friday', short: 'Fri', type: 'Weekday', active: true }
   ],
   weekends: [
-    { id: 'saturday', name: 'Saturday', labelPt: 'Sábado', type: 'weekend', active: true },
-    { id: 'sunday', name: 'Sunday', labelPt: 'Domingo', type: 'weekend', active: true }
+    { id: 'saturday', name: 'Saturday', short: 'Sat', type: 'Weekend', active: true },
+    { id: 'sunday', name: 'Sunday', short: 'Sun', type: 'Weekend', active: true }
   ]
 };
 
-export const TIME_PERIODS = {
-  WEEKDAY: ['Morning', 'Midday', 'Afternoon'],
-  SATURDAY: ['Morning', 'Midday', 'Afternoon', 'Late Afternoon'],
-  SUNDAY: ['Morning', 'Midday', 'Afternoon']
-};
-
 /**
- * Returns a flat list of all active coaching days
+ * Returns a flat array of all 7 days of the week
  */
 export function getAllDays() {
   return [...DAYS_CONFIG.weekdays, ...DAYS_CONFIG.weekends];
+}
+
+/**
+ * Returns a unique slot identifier (e.g. 'wednesday_morning')
+ */
+export function getSlotKey(dayId, periodId) {
+  return `${dayId}_${periodId}`;
 }

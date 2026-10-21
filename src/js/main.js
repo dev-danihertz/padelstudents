@@ -28,9 +28,9 @@ const VIEW_METADATA = {
     title: 'Lessons & Sessions',
     subtitle: 'Schedule and manage 1:1 and group padel sessions.'
   },
-  tabelas: {
-    title: 'Tabelas',
-    subtitle: 'Gestão e visualização das tabelas de dados do sistema.'
+  tables: {
+    title: 'Tables & Schedules',
+    subtitle: 'Manage system lookup tables, weekly availability, and time periods.'
   },
   settings: {
     title: 'Settings',
@@ -44,15 +44,17 @@ let authMode = 'signin'; // 'signin' or 'signup'
 
 /**
  * Switch the active view based on the given view identifier
- * @param {string} viewId - e.g., 'dashboard', 'students', 'find-players'
+ * @param {string} viewId - e.g., 'dashboard', 'students', 'find-players', 'tables'
  */
 function navigateTo(viewId) {
-  const targetId = VIEW_METADATA[viewId] ? viewId : 'dashboard';
+  // Support both #tables and previous #tabelas
+  const normalizedId = (viewId === 'tabelas') ? 'tables' : viewId;
+  const targetId = VIEW_METADATA[normalizedId] ? normalizedId : 'dashboard';
   const meta = VIEW_METADATA[targetId];
 
   // 1. Update navigation links (active styling)
   document.querySelectorAll('.nav-link').forEach((link) => {
-    if (link.dataset.view === targetId) {
+    if (link.dataset.view === targetId || (targetId === 'tables' && link.dataset.view === 'tabelas')) {
       link.classList.add('active');
       link.setAttribute('aria-current', 'page');
     } else {
