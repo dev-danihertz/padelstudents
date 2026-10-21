@@ -27,13 +27,13 @@ CREATE TABLE IF NOT EXISTS public.students (
     CHECK (student_status IN ('active', 'occasional', 'inactive', 'archived')),
   general_notes TEXT,
 
-  -- Padel Level & Group Range
-  current_level NUMERIC(3, 1) NOT NULL DEFAULT 2.0 
-    CHECK (current_level >= 1.0 AND current_level <= 7.0),
-  min_level NUMERIC(3, 1) NOT NULL DEFAULT 2.0 
-    CHECK (min_level >= 1.0 AND min_level <= 7.0),
-  max_level NUMERIC(3, 1) NOT NULL DEFAULT 2.5 
-    CHECK (max_level >= 1.0 AND max_level <= 7.0),
+  -- Padel Level & Group Range (Supports 0.25 increments, e.g. 1.25, 2.50, 3.75)
+  current_level NUMERIC(4, 2) NOT NULL DEFAULT 2.00 
+    CHECK (current_level >= 1.00 AND current_level <= 7.00),
+  min_level NUMERIC(4, 2) NOT NULL DEFAULT 2.00 
+    CHECK (min_level >= 1.00 AND min_level <= 7.00),
+  max_level NUMERIC(4, 2) NOT NULL DEFAULT 2.50 
+    CHECK (max_level >= 1.00 AND max_level <= 7.00),
 
   -- Contact Preferences & CRM Follow-up
   preferred_contact_method TEXT DEFAULT 'whatsapp' 

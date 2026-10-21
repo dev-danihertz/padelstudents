@@ -11,6 +11,7 @@ import { supabase, isSupabaseConfigured } from './supabaseClient.js';
 import { signIn, signUp, signOut, getSession, onAuthStateChange } from './auth.js';
 import { initTimePeriodsUI } from './availability.js';
 import { initLessonFormatsUI } from './lessonFormats.js';
+import { initPadelLevelsUI } from './padelLevels.js';
 
 // View configurations containing human-readable titles and descriptions
 const VIEW_METADATA = {
@@ -474,6 +475,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventHandlers();
   initTimePeriodsUI();
   initLessonFormatsUI();
+  initPadelLevelsUI();
 
   // Listen for hash changes in URL
   window.addEventListener('hashchange', handleHashChange);
