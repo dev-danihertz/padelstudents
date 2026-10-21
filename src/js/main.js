@@ -10,6 +10,7 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient.js';
 import { signIn, signUp, signOut, getSession, onAuthStateChange } from './auth.js';
 import { initTimePeriodsUI } from './availability.js';
+import { initLessonFormatsUI } from './lessonFormats.js';
 
 // View configurations containing human-readable titles and descriptions
 const VIEW_METADATA = {
@@ -472,6 +473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupMobileMenu();
   setupEventHandlers();
   initTimePeriodsUI();
+  initLessonFormatsUI();
 
   // Listen for hash changes in URL
   window.addEventListener('hashchange', handleHashChange);

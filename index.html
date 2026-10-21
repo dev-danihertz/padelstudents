@@ -469,10 +469,7 @@
                 <h2 class="card-title">Daily Time Periods (Customisable Time Windows)</h2>
                 <p class="text-muted text-xs">Edit your coaching time boundaries directly in your browser. Changes update the matrix below and persist automatically.</p>
               </div>
-              <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <button class="btn btn-sm btn-secondary" id="btn-reset-time-periods" title="Restore factory default time windows">
-                  ↺ Reset Defaults
-                </button>
+              <div>
                 <span class="badge badge-member">4 Periods</span>
               </div>
             </div>
@@ -525,7 +522,7 @@
           </div>
 
           <!-- Relational Database Context Card -->
-          <div class="card">
+          <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-body">
               <h3 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 0.5rem;">
                 🔗 Database Mapping: <code>student_availability</code>
@@ -536,6 +533,52 @@
               <div style="background-color: var(--neutral-bg); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-family: monospace; font-size: 0.825rem; color: var(--primary-900);">
                 INSERT INTO public.student_availability (student_id, day_of_week, time_period)<br>
                 VALUES ('d3b07384-...', 'wednesday', 'morning');
+              </div>
+            </div>
+          </div>
+
+          <!-- Lesson Formats Table (1:1, 1:2, 1:3, 1:4, 1:5+) -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <h2 class="card-title">Lesson Formats &amp; Group Types (1:1 &ndash; 1:5+)</h2>
+                <p class="text-muted text-xs">Define student-to-coach ratios for private and group coaching. Click Edit to customize names or descriptions directly in your browser.</p>
+              </div>
+              <div>
+                <span class="badge badge-member">5 Formats</span>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Format Code</th>
+                    <th scope="col">Format Name</th>
+                    <th scope="col">Capacity</th>
+                    <th scope="col">Description &amp; Focus Area</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="lesson-formats-table-body">
+                  <!-- Populated dynamically via JavaScript with live inline editing -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Relational Database Context Card for Lesson Preferences -->
+          <div class="card">
+            <div class="card-body">
+              <h3 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 0.5rem;">
+                🔗 Database Mapping: <code>student_lesson_preferences</code>
+              </h3>
+              <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                When a student selects multiple acceptable formats (e.g. 1:1 and 1:3), each selection creates a row in the relational preferences table:
+              </p>
+              <div style="background-color: var(--neutral-bg); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-family: monospace; font-size: 0.825rem; color: var(--primary-900);">
+                INSERT INTO public.student_lesson_preferences (student_id, lesson_format)<br>
+                VALUES ('d3b07384-...', '1:3');
               </div>
             </div>
           </div>

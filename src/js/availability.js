@@ -282,17 +282,6 @@ export function initTimePeriodsUI() {
     });
   }
 
-  // Reset to Defaults click
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      if (confirm('Restore default coaching time windows (e.g. Midday back to 12:00 – 14:00)?')) {
-        resetTimePeriods();
-        activeEditingPeriodId = null;
-        render();
-      }
-    });
-  }
-
   // Initial render
   render();
 }

@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public.student_lesson_preferences (
   student_id UUID NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
   
   lesson_format TEXT NOT NULL 
-    CHECK (lesson_format IN ('1:1', '1:2', '1:3', '1:4')),
+    CHECK (lesson_format IN ('1:1', '1:2', '1:3', '1:4', '1:5+')),
   
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
 
