@@ -28,6 +28,10 @@ const VIEW_METADATA = {
     title: 'Lessons & Sessions',
     subtitle: 'Schedule and manage 1:1 and group padel sessions.'
   },
+  tabelas: {
+    title: 'Tabelas',
+    subtitle: 'Gestão e visualização das tabelas de dados do sistema.'
+  },
   settings: {
     title: 'Settings',
     subtitle: 'Configure coaching parameters and system settings.'
