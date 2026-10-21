@@ -70,15 +70,15 @@
 
       <div class="sidebar-footer">
         <div class="coach-profile">
-          <div class="avatar" aria-hidden="true">DH</div>
+          <div class="avatar" id="user-avatar" aria-hidden="true">DH</div>
           <div class="coach-info">
-            <span class="coach-name">Coach Daniel</span>
-            <span class="coach-role">Single-User Account</span>
+            <span class="coach-name" id="user-display-name">Coach Daniel</span>
+            <span class="coach-role" id="user-auth-status">Checking auth...</span>
           </div>
         </div>
         <div class="system-status">
-          <span class="status-dot status-phase1"></span>
-          <span class="status-text">Phase 1: Local Shell</span>
+          <span class="status-dot" id="system-status-dot"></span>
+          <span class="status-text" id="system-status-text">Phase 2: Database Setup</span>
         </div>
       </div>
     </aside>
@@ -97,8 +97,12 @@
           </div>
         </div>
         <div class="top-bar-actions">
-          <button class="btn btn-secondary" id="btn-quick-filter" data-target="find-players">
-            <span>🎯 Find Match</span>
+          <span class="db-status-pill" id="header-db-pill">
+            <span class="status-dot" id="db-pill-dot"></span>
+            <span id="db-pill-label">Connecting to Supabase...</span>
+          </span>
+          <button class="btn btn-secondary" id="btn-auth-action">
+            <span id="btn-auth-label">Sign In</span>
           </button>
           <button class="btn btn-primary" id="btn-add-student">
             <span>+ Add Student</span>
@@ -110,11 +114,11 @@
       <main class="content-container" id="main-content">
         <!-- 1. DASHBOARD VIEW -->
         <section class="view-panel active" id="view-dashboard" aria-labelledby="current-page-title">
-          <!-- Welcome Alert Banner -->
-          <div class="alert-banner">
-            <div class="alert-icon" aria-hidden="true">💡</div>
-            <div class="alert-body">
-              <strong>Phase 1 Initialised:</strong> The user interface shell and navigation are now operational. In Phase 2, we will connect your live Supabase cloud database to synchronise student records seamlessly between your home and work computers.
+          <!-- Supabase Connection Alert Banner -->
+          <div class="alert-banner" id="dashboard-db-banner">
+            <div class="alert-icon" id="dashboard-banner-icon" aria-hidden="true">⏳</div>
+            <div class="alert-body" id="dashboard-banner-body">
+              <strong>Phase 2 Active:</strong> Setting up your Supabase cloud database. Once connected, your student records will be stored in PostgreSQL and secured with Row Level Security.
             </div>
           </div>
 
@@ -165,7 +169,7 @@
             </div>
           </div>
 
-          <!-- Quick Navigation & Helpful Hints -->
+          <!-- Quick Navigation & Roadmap -->
           <div class="dashboard-grid">
             <div class="card">
               <div class="card-header">
@@ -186,12 +190,19 @@
                     <p>Pair compatible players by overlapping levels and availability.</p>
                   </div>
                 </a>
+                <a href="#settings" class="action-tile" data-view="settings">
+                  <div class="action-tile-icon">⚙️</div>
+                  <div class="action-tile-text">
+                    <strong>Inspect Supabase Connection</strong>
+                    <p>Check your cloud database credentials and table statuses.</p>
+                  </div>
+                </a>
               </div>
             </div>
 
             <div class="card">
               <div class="card-header">
-                <h2 class="card-title">Next Development Milestone</h2>
+                <h2 class="card-title">Development Roadmap</h2>
               </div>
               <div class="card-body">
                 <ul class="roadmap-list">
@@ -205,7 +216,7 @@
                   <li class="roadmap-item pending">
                     <span class="roadmap-icon">2</span>
                     <div>
-                      <strong>Phase 2: Supabase Cloud Database</strong>
+                      <strong>Phase 2: Supabase Cloud Database (In Progress)</strong>
                       <p>PostgreSQL schema migrations, Row Level Security, and secure API keys.</p>
                     </div>
                   </li>
@@ -434,17 +445,154 @@
           </div>
         </section>
 
-        <!-- 5. SETTINGS VIEW (Placeholder) -->
+        <!-- 5. SETTINGS VIEW -->
         <section class="view-panel" id="view-settings">
-          <div class="card placeholder-card">
-            <div class="placeholder-icon">⚙️</div>
-            <h2>CRM Settings &amp; Configuration</h2>
-            <p class="placeholder-desc">
-              In this section, you will be able to review your Supabase connection parameters, configure custom availability time slots (e.g. define what "Morning", "Midday" and "Afternoon" correspond to at your club), and manage coach preferences.
-            </p>
+          <div class="settings-grid">
+            <!-- Supabase Cloud Connection Status Card -->
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Supabase Cloud Database Status</h2>
+              </div>
+              <div class="card-body">
+                <div class="connection-status-box" id="settings-status-box">
+                  <div class="status-indicator-row">
+                    <span class="status-dot" id="settings-dot"></span>
+                    <strong id="settings-connection-text">Detecting configuration...</strong>
+                  </div>
+                  <p class="text-muted text-xs" id="settings-connection-subtext">
+                    Checking for <code>.env</code> file with <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code>.
+                  </p>
+                </div>
+
+                <div class="connection-details-table">
+                  <div class="detail-row">
+                    <span class="detail-key">Project URL:</span>
+                    <span class="detail-val" id="settings-url-display">Not configured</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-key">Public Key:</span>
+                    <span class="detail-val" id="settings-key-display">Not configured</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-key">Auth State:</span>
+                    <span class="detail-val" id="settings-auth-display">Not logged in</span>
+                  </div>
+                </div>
+
+                <div class="settings-guide-box">
+                  <h3>How to link your Supabase project:</h3>
+                  <ol class="guide-steps">
+                    <li>Create a copy of <code>.env.example</code> named <code>.env</code> in your project root.</li>
+                    <li>In your Supabase dashboard, go to <strong>Project Settings &rarr; API</strong>.</li>
+                    <li>Copy your <strong>Project URL</strong> and <strong>anon (public) key</strong> into your <code>.env</code> file.</li>
+                    <li>Restart the Vite server (or save the file) and refresh this page.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- Database Migration Checklist Card -->
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Database Schema &amp; Migration</h2>
+              </div>
+              <div class="card-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Your migration script <code>supabase/migrations/01_initial_schema.sql</code> is ready to run in the Supabase SQL Editor.
+                </p>
+                <div class="schema-checklist">
+                  <div class="checklist-item">
+                    <span class="checklist-icon">📄</span>
+                    <div>
+                      <strong>students table</strong>
+                      <p>Core profile, levels (min/max range constraint), contact prefs, notes.</p>
+                    </div>
+                  </div>
+                  <div class="checklist-item">
+                    <span class="checklist-icon">⏰</span>
+                    <div>
+                      <strong>student_availability table</strong>
+                      <p>Day of week + time period slots (Morning, Midday, Afternoon, etc.).</p>
+                    </div>
+                  </div>
+                  <div class="checklist-item">
+                    <span class="checklist-icon">🎾</span>
+                    <div>
+                      <strong>student_lesson_preferences table</strong>
+                      <p>Format preferences (1:1, 1:2, 1:3, 1:4).</p>
+                    </div>
+                  </div>
+                  <div class="checklist-item">
+                    <span class="checklist-icon">🔒</span>
+                    <div>
+                      <strong>Row Level Security (RLS)</strong>
+                      <p>Policies restricting all queries to <code>auth.uid() = user_id</code>.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
+    </div>
+  </div>
+
+  <!-- Authentication Modal (Sign In / Sign Up) -->
+  <div class="modal-backdrop" id="auth-modal" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-labelledby="auth-modal-title">
+      <div class="modal-header">
+        <h2 class="modal-title" id="auth-modal-title">Coach Account Sign In</h2>
+        <button class="icon-button close-modal-btn" id="close-auth-modal-btn" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" id="auth-modal-desc">
+          Sign in to synchronise your student roster and coaching groups across your devices.
+        </p>
+
+        <!-- Auth Error / Success Alert -->
+        <div class="auth-feedback" id="auth-feedback" style="display: none;"></div>
+
+        <form id="auth-form">
+          <div class="form-group">
+            <label for="auth-email" class="form-label">Email address</label>
+            <input 
+              type="email" 
+              id="auth-email" 
+              class="form-control" 
+              placeholder="coach@example.co.uk" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="auth-password" class="form-label">Password</label>
+            <input 
+              type="password" 
+              id="auth-password" 
+              class="form-control" 
+              placeholder="••••••••••••" 
+              required 
+              minlength="6"
+              autocomplete="current-password"
+            />
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary btn-block" id="btn-submit-auth">
+              Sign In
+            </button>
+          </div>
+        </form>
+
+        <div class="auth-toggle-row">
+          <span id="auth-toggle-prompt">First time setting up your account?</span>
+          <button type="button" class="btn-ghost" id="btn-toggle-auth-mode">
+            Create coach account
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
