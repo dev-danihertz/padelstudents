@@ -453,12 +453,123 @@
 
         <!-- 5. TABELAS VIEW -->
         <section class="view-panel" id="view-tabelas">
-          <div class="card placeholder-card">
-            <div class="placeholder-icon">🗂️</div>
-            <h2>Tabelas e Dados de Referência</h2>
-            <p class="placeholder-desc">
-              Esta secção foi criada conforme o seu pedido para organizar as tabelas do seu projeto (como parâmetros de nível, tabelas de apoio e registos de configuração).
-            </p>
+          <!-- Sub-header for Tables section -->
+          <div class="card table-controls-card" style="padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div class="tabs-header">
+              <button class="tab-button active" id="tab-table-availability">
+                📅 Disponibilidade (Availability)
+              </button>
+              <button class="tab-button text-muted" style="cursor: not-allowed;" title="Próximas tabelas de apoio">
+                + Mais Tabelas (Futuro)
+              </button>
+            </div>
+          </div>
+
+          <!-- Availability Tables Grid: Weekdays vs Weekends -->
+          <div class="tables-view-grid">
+            <!-- 1. Weekdays Card -->
+            <div class="card">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <h2 class="card-title">Weekdays (Dias de Semana)</h2>
+                  <p class="text-muted text-xs">Dias úteis para treinos e aulas regulares</p>
+                </div>
+                <span class="badge badge-member">5 Dias</span>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Dia (Day)</th>
+                      <th scope="col">Identificador</th>
+                      <th scope="col">Categoria</th>
+                      <th scope="col">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Segunda-feira</strong> (Monday)</td>
+                      <td><code>monday</code></td>
+                      <td><span class="badge badge-non-member">Weekday</span></td>
+                      <td><span class="badge badge-status-active">Ativo</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Terça-feira</strong> (Tuesday)</td>
+                      <td><code>tuesday</code></td>
+                      <td><span class="badge badge-non-member">Weekday</span></td>
+                      <td><span class="badge badge-status-active">Ativo</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Quarta-feira</strong> (Wednesday)</td>
+                      <td><code>wednesday</code></td>
+                      <td><span class="badge badge-non-member">Weekday</span></td>
+                      <td><span class="badge badge-status-active">Ativo</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Quinta-feira</strong> (Thursday)</td>
+                      <td><code>thursday</code></td>
+                      <td><span class="badge badge-non-member">Weekday</span></td>
+                      <td><span class="badge badge-status-active">Ativo</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Sexta-feira</strong> (Friday)</td>
+                      <td><code>friday</code></td>
+                      <td><span class="badge badge-non-member">Weekday</span></td>
+                      <td><span class="badge badge-status-active">Ativo</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 2. Weekends Card -->
+            <div class="card">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <h2 class="card-title">Weekends (Fim de Semana)</h2>
+                  <p class="text-muted text-xs">Aulas intensivas, jogos e clínicas ao fim de semana</p>
+                </div>
+                <span class="badge badge-status-occasional">2 Dias</span>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Dia (Day)</th>
+                      <th scope="col">Identificador</th>
+                      <th scope="col">Categoria</th>
+                      <th scope="col">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Sábado</strong> (Saturday)</td>
+                      <td><code>saturday</code></td>
+                      <td><span class="badge badge-member">Weekend</span></td>
+                      <td><span class="badge badge-status-active">Ativo</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Domingo</strong> (Sunday)</td>
+                      <td><code>sunday</code></td>
+                      <td><span class="badge badge-member">Weekend</span></td>
+                      <td><span class="badge badge-status-active">Ativo</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Evolutionary Guidance Box -->
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-body">
+              <h3 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 0.5rem;">
+                💡 Próxima evolução: Subdivisão em Turnos / Períodos
+              </h3>
+              <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6;">
+                Criámos a base estrutural com os grupos <strong>Weekdays</strong> (Seg a Sex) e <strong>Weekends</strong> (Sáb e Dom). Quando quiser avançar, poderemos associar a cada dia os turnos disponíveis (ex: <em>Morning</em>, <em>Midday</em>, <em>Afternoon</em>, <em>Late Afternoon</em>) para permitir filtros avançados de busca de parceiros!
+              </p>
+            </div>
           </div>
         </section>
 
