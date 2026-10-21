@@ -464,12 +464,17 @@
 
           <!-- Top Grid: Time Periods Breakdown -->
           <div class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
               <div>
-                <h2 class="card-title">Daily Time Periods (Turnos Disponíveis)</h2>
-                <p class="text-muted text-xs">Standard coaching periods used across weekdays and weekends.</p>
+                <h2 class="card-title">Daily Time Periods (Customisable Time Windows)</h2>
+                <p class="text-muted text-xs">Edit your coaching time boundaries directly in your browser. Changes update the matrix below and persist automatically.</p>
               </div>
-              <span class="badge badge-member">4 Periods Configured</span>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-sm btn-secondary" id="btn-reset-time-periods" title="Restore factory default time windows">
+                  ↺ Reset Defaults
+                </button>
+                <span class="badge badge-member">4 Periods</span>
+              </div>
             </div>
             <div class="table-responsive">
               <table class="data-table">
@@ -480,37 +485,11 @@
                     <th scope="col">Time Window</th>
                     <th scope="col">Typical Format &amp; Session Type</th>
                     <th scope="col">Status</th>
+                    <th scope="col" class="text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Morning</strong></td>
-                    <td><code>morning</code></td>
-                    <td><span class="range-text">08:00 &ndash; 12:00</span></td>
-                    <td class="text-muted">Early and mid-morning coaching sessions, drills and technical clinics.</td>
-                    <td><span class="badge badge-status-active">Active</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Midday</strong></td>
-                    <td><code>midday</code></td>
-                    <td><span class="range-text">12:00 &ndash; 14:00</span></td>
-                    <td class="text-muted">Lunchtime private 1:1 sessions and express group clinics.</td>
-                    <td><span class="badge badge-status-active">Active</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Afternoon</strong></td>
-                    <td><code>afternoon</code></td>
-                    <td><span class="range-text">14:00 &ndash; 17:00</span></td>
-                    <td class="text-muted">Early afternoon lessons, student progression drills, and match play.</td>
-                    <td><span class="badge badge-status-active">Active</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Late Afternoon</strong></td>
-                    <td><code>late_afternoon</code></td>
-                    <td><span class="range-text">17:00 &ndash; 20:00</span></td>
-                    <td class="text-muted">Post-work, evening social groups, and floodlit court sessions.</td>
-                    <td><span class="badge badge-status-active">Active</span></td>
-                  </tr>
+                <tbody id="time-periods-table-body">
+                  <!-- Populated dynamically via JavaScript -->
                 </tbody>
               </table>
             </div>
@@ -531,79 +510,15 @@
                   <tr>
                     <th scope="col">Day of Week</th>
                     <th scope="col">Category</th>
-                    <th scope="col">Morning (08:00&ndash;12:00)</th>
-                    <th scope="col">Midday (12:00&ndash;14:00)</th>
-                    <th scope="col">Afternoon (14:00&ndash;17:00)</th>
-                    <th scope="col">Late Afternoon (17:00&ndash;20:00)</th>
+                    <th scope="col" id="th-matrix-morning">Morning</th>
+                    <th scope="col" id="th-matrix-midday">Midday</th>
+                    <th scope="col" id="th-matrix-afternoon">Afternoon</th>
+                    <th scope="col" id="th-matrix-late_afternoon">Late Afternoon</th>
                     <th scope="col" class="text-right">Total Slots</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <!-- Weekdays -->
-                  <tr>
-                    <td><strong>Monday</strong></td>
-                    <td><span class="badge badge-non-member">Weekday</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td class="text-right"><strong>4 slots</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Tuesday</strong></td>
-                    <td><span class="badge badge-non-member">Weekday</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td class="text-right"><strong>4 slots</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Wednesday</strong></td>
-                    <td><span class="badge badge-non-member">Weekday</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td class="text-right"><strong>4 slots</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Thursday</strong></td>
-                    <td><span class="badge badge-non-member">Weekday</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td class="text-right"><strong>4 slots</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Friday</strong></td>
-                    <td><span class="badge badge-non-member">Weekday</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td class="text-right"><strong>4 slots</strong></td>
-                  </tr>
-                  <!-- Weekends -->
-                  <tr style="background-color: #fafbfc;">
-                    <td><strong>Saturday</strong></td>
-                    <td><span class="badge badge-member">Weekend</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td class="text-right"><strong>4 slots</strong></td>
-                  </tr>
-                  <tr style="background-color: #fafbfc;">
-                    <td><strong>Sunday</strong></td>
-                    <td><span class="badge badge-member">Weekend</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td><span class="tag" style="background-color: var(--accent-100); color: var(--accent-600);">Available</span></td>
-                    <td class="text-right"><strong>4 slots</strong></td>
-                  </tr>
+                <tbody id="schedule-matrix-body">
+                  <!-- Populated dynamically via JavaScript -->
                 </tbody>
               </table>
             </div>
