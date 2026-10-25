@@ -9,10 +9,11 @@
 
 import { supabase, isSupabaseConfigured } from './supabaseClient.js';
 import { signIn, signUp, signOut, getSession, onAuthStateChange } from './auth.js';
-import { initTimePeriodsUI } from './availability.js';
+import { initTimePeriodsUI, getAllDays, getTimePeriods } from './availability.js';
 import { initLessonFormatsUI } from './lessonFormats.js';
 import { initLessonThemesUI } from './lessonThemes.js';
 import { initPadelLevelsUI } from './padelLevels.js';
+import { initStudentsUI } from './students.js';
 
 // View configurations containing human-readable titles and descriptions
 const VIEW_METADATA = {
@@ -45,6 +46,7 @@ const VIEW_METADATA = {
 // Current application state
 let currentUser = null;
 let authMode = 'signin'; // 'signin' or 'signup'
+let studentsUI = null;
 
 /**
  * Switch the active view based on the given view identifier
@@ -254,7 +256,7 @@ function updateConnectionUI() {
     }
     if (dashIcon) dashIcon.textContent = '✅';
     if (dashBody) {
-      dashBody.innerHTML = `<strong>Connected &amp; Authenticated:</strong> Signed in as <code>${email}</code>. In Phase 3, you can start managing live student records.`;
+      dashBody.innerHTML = `<strong>Connected &amp; Authenticated:</strong> Signed in as <code>${email}</code>. Manage student records and weekly availability in the Students Directory.`;
     }
   }
 }
@@ -404,66 +406,11 @@ function setupEventHandlers() {
     });
   }
 
-  // Quick Action: Add Student button in header
-  const addStudentBtn = document.getElementById('btn-add-student');
-  if (addStudentBtn) {
-    addStudentBtn.addEventListener('click', () => {
-      window.location.hash = '#students';
-      if (!isSupabaseConfigured) {
-        alert(
-          'Phase 2 in progress:\n\n' +
-          'Please configure your Supabase cloud credentials first.\n' +
-          'Visit the Settings tab for guidance.'
-        );
-      } else if (!currentUser) {
-        alert(
-          'Authentication Required:\n\n' +
-          'Please sign in to your coach account before managing student records.'
-        );
-        openAuthModal();
-      } else {
-        alert(
-          'Database Connected & Authenticated!\n\n' +
-          'In Phase 3, this button will open the live student creation form to insert records into your PostgreSQL database.'
-        );
-      }
-    });
-  }
-
   // Quick Action: Find Match in header
   const quickFilterBtn = document.getElementById('btn-quick-filter');
   if (quickFilterBtn) {
     quickFilterBtn.addEventListener('click', () => {
       window.location.hash = '#find-players';
-    });
-  }
-
-  // Student directory tabs (Active vs Archived)
-  const tabActive = document.getElementById('tab-active-students');
-  const tabArchived = document.getElementById('tab-archived-students');
-
-  if (tabActive && tabArchived) {
-    tabActive.addEventListener('click', () => {
-      tabActive.classList.add('active');
-      tabArchived.classList.remove('active');
-    });
-
-    tabArchived.addEventListener('click', () => {
-      tabArchived.classList.add('active');
-      tabActive.classList.remove('active');
-    });
-  }
-
-  // Search input mock feedback
-  const searchInput = document.getElementById('student-search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase().trim();
-      const rows = document.querySelectorAll('#students-table-body tr');
-      rows.forEach((row) => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
-      });
     });
   }
 
@@ -513,9 +460,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     onAuthStateChange((event, session) => {
       currentUser = session?.user || null;
       updateConnectionUI();
+      studentsUI?.refresh();
       console.log(`🔐 Supabase Auth Event: ${event}`, currentUser?.email);
     });
   }
+
+  studentsUI = initStudentsUI({
+    supabase,
+    isSupabaseConfigured,
+    getCurrentUser: () => currentUser,
+    getAllDays,
+    getTimePeriods
+  });
 
   // Initial UI refresh
   updateConnectionUI();

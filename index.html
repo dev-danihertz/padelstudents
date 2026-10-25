@@ -226,11 +226,11 @@
                       <p>PostgreSQL schema migrations, Row Level Security, and secure API keys.</p>
                     </div>
                   </li>
-                  <li class="roadmap-item upcoming">
+                  <li class="roadmap-item pending">
                     <span class="roadmap-icon">3</span>
                     <div>
-                      <strong>Phase 3: Student Management (CRUD)</strong>
-                      <p>Live forms for adding, editing, archiving, and searching students.</p>
+                      <strong>Phase 3: Student Management (In Progress)</strong>
+                      <p>Student records, search, and per-student weekly availability.</p>
                     </div>
                   </li>
                 </ul>
@@ -272,6 +272,25 @@
                   <option value="intermediate">Intermediate (3.5 &ndash; 4.0)</option>
                   <option value="advanced">Advanced (4.5+)</option>
                 </select>
+
+                <input id="filter-target-level" class="form-control" type="number" min="1" max="7" step="0.25" placeholder="Level in group range" aria-label="Filter students whose acceptable group range includes this level" />
+
+                <select id="filter-availability-day" class="form-select" aria-label="Filter by available day">
+                  <option value="all">Any day</option>
+                  <option value="monday">Monday</option>
+                  <option value="tuesday">Tuesday</option>
+                  <option value="wednesday">Wednesday</option>
+                  <option value="thursday">Thursday</option>
+                  <option value="friday">Friday</option>
+                  <option value="saturday">Saturday</option>
+                  <option value="sunday">Sunday</option>
+                </select>
+
+                <select id="filter-availability-period" class="form-select" aria-label="Filter by available time period">
+                  <option value="all">Any time</option>
+                </select>
+
+                <button type="button" class="btn btn-sm btn-secondary" id="btn-clear-student-filters">Clear filters</button>
               </div>
             </div>
 
@@ -293,137 +312,64 @@
                 <thead>
                   <tr>
                     <th scope="col">Student Name</th>
-                    <th scope="col">Contact Details</th>
                     <th scope="col">Membership</th>
                     <th scope="col">Level</th>
                     <th scope="col">Acceptable Group Range</th>
-                    <th scope="col">Preferred Formats</th>
                     <th scope="col">Status</th>
-                    <th scope="col" class="text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody id="students-table-body">
-                  <!-- Sample preview rows illustrating format and design -->
-                  <tr>
-                    <td>
-                      <div class="student-name-cell">
-                        <span class="name-text">Oliver Smith</span>
-                        <span class="text-muted text-xs">Created: 14 Oct 2026</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="contact-cell">
-                        <span class="contact-item">📱 07700 900123</span>
-                        <span class="contact-item text-muted">✉️ oliver.s@example.co.uk</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-member">Member</span></td>
-                    <td><span class="level-pill">2.5</span></td>
-                    <td><span class="range-text">2.0 &ndash; 3.0</span></td>
-                    <td>
-                      <div class="format-tags">
-                        <span class="tag">1:1</span>
-                        <span class="tag">1:2</span>
-                        <span class="tag">1:4</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-status-active">Active</span></td>
-                    <td class="text-right">
-                      <button class="btn btn-sm btn-ghost" title="Edit student">Edit</button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <div class="student-name-cell">
-                        <span class="name-text">Charlotte Davies</span>
-                        <span class="text-muted text-xs">Created: 02 Oct 2026</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="contact-cell">
-                        <span class="contact-item">📱 07700 900456</span>
-                        <span class="contact-item text-muted">✉️ charlotte.d@example.co.uk</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-non-member">Non-member</span></td>
-                    <td><span class="level-pill">3.0</span></td>
-                    <td><span class="range-text">2.5 &ndash; 3.5</span></td>
-                    <td>
-                      <div class="format-tags">
-                        <span class="tag">1:3</span>
-                        <span class="tag">1:4</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-status-active">Active</span></td>
-                    <td class="text-right">
-                      <button class="btn btn-sm btn-ghost" title="Edit student">Edit</button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <div class="student-name-cell">
-                        <span class="name-text">James Wilson</span>
-                        <span class="text-muted text-xs">Created: 28 Sep 2026</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="contact-cell">
-                        <span class="contact-item">📱 07700 900789</span>
-                        <span class="contact-item text-muted">✉️ j.wilson@example.co.uk</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-member">Member</span></td>
-                    <td><span class="level-pill">2.0</span></td>
-                    <td><span class="range-text">2.0 &ndash; 2.5</span></td>
-                    <td>
-                      <div class="format-tags">
-                        <span class="tag">1:1</span>
-                        <span class="tag">1:2</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-status-occasional">Occasional</span></td>
-                    <td class="text-right">
-                      <button class="btn btn-sm btn-ghost" title="Edit student">Edit</button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <div class="student-name-cell">
-                        <span class="name-text">Sophie Taylor</span>
-                        <span class="text-muted text-xs">Created: 19 Sep 2026</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="contact-cell">
-                        <span class="contact-item">📱 07700 900321</span>
-                        <span class="contact-item text-muted">✉️ sophie.t@example.co.uk</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-unknown">Unknown</span></td>
-                    <td><span class="level-pill">4.0</span></td>
-                    <td><span class="range-text">3.5 &ndash; 4.5</span></td>
-                    <td>
-                      <div class="format-tags">
-                        <span class="tag">1:1</span>
-                      </div>
-                    </td>
-                    <td><span class="badge badge-status-inactive">Inactive</span></td>
-                    <td class="text-right">
-                      <button class="btn btn-sm btn-ghost" title="Edit student">Edit</button>
-                    </td>
-                  </tr>
-                </tbody>
+                <tbody id="students-table-body"></tbody>
               </table>
             </div>
 
             <div class="table-footer">
-              <span class="table-info">Showing 4 preview students (Database integration will connect in Phase 2 &amp; 3)</span>
+              <span class="table-info" id="students-table-info">Student records are stored in this browser until Supabase is configured.</span>
             </div>
           </div>
         </section>
+
+        <div class="modal-backdrop" id="student-modal" aria-hidden="true">
+          <div class="modal-dialog student-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="student-modal-title">
+            <div class="modal-header">
+              <h2 class="modal-title" id="student-modal-title">Add Student</h2>
+              <button type="button" class="icon-button close-modal-btn" id="close-student-modal" aria-label="Close dialog">&times;</button>
+            </div>
+            <form id="student-form">
+              <div class="modal-body student-modal-body">
+                <p class="modal-desc">Choose each day and time period when this student is available. Saturday and Sunday are separate days.</p>
+                <div class="student-form-grid">
+                  <label class="form-group">Full name *<input class="form-control" name="full_name" required /></label>
+                  <label class="form-group">Phone<input class="form-control" name="phone" /></label>
+                  <label class="form-group">Email<input class="form-control" type="email" name="email" /></label>
+                  <label class="form-group">Membership
+                    <select class="form-select" name="membership_status"><option value="unknown">Unknown</option><option value="member">Member</option><option value="non-member">Non-member</option></select>
+                  </label>
+                  <label class="form-group">Current level<input class="form-control" type="number" min="1" max="7" step="0.25" name="current_level" value="2.00" required /></label>
+                  <label class="form-group">Minimum group level<input class="form-control" type="number" min="1" max="7" step="0.25" name="min_level" value="2.00" required /></label>
+                  <label class="form-group">Maximum group level<input class="form-control" type="number" min="1" max="7" step="0.25" name="max_level" value="2.50" required /></label>
+                  <label class="form-group">Status
+                    <select class="form-select" name="student_status"><option value="active">Active</option><option value="occasional">Occasional</option><option value="inactive">Inactive</option><option value="archived">Archived</option></select>
+                  </label>
+                </div>
+                <fieldset class="availability-fieldset">
+                  <legend>Weekly availability</legend>
+                  <div id="weekly-availability-shortcuts" class="weekly-availability-shortcuts"></div>
+                  <div id="student-availability-grid"></div>
+                </fieldset>
+                <fieldset class="availability-fieldset">
+                  <legend>Lesson themes completed</legend>
+                  <p class="text-muted text-xs">Select the themes this student has already completed.</p>
+                  <div id="student-completed-themes" class="completed-themes-grid"></div>
+                </fieldset>
+                <p class="text-muted text-xs" id="student-form-feedback" role="status"></p>
+              </div>
+              <div class="modal-actions student-modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-student-form">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="save-student-btn">Save Student</button>
+              </div>
+            </form>
+          </div>
+        </div>
 
         <!-- 3. FIND PLAYERS VIEW (Placeholder) -->
         <section class="view-panel" id="view-find-players">
@@ -476,7 +422,7 @@
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
               <div>
                 <h2 class="card-title">Daily Time Periods (Customisable Time Windows)</h2>
-                <p class="text-muted text-xs">Edit your coaching time boundaries directly in your browser. Changes update the matrix below and persist automatically.</p>
+                <p class="text-muted text-xs">These time groups are quick-select shortcuts. Student availability is saved in individual 30-minute slots from 09:00 to 20:00.</p>
               </div>
               <div>
                 <span class="badge badge-member">4 Periods</span>
@@ -541,7 +487,7 @@
               </p>
               <div style="background-color: var(--neutral-bg); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-family: monospace; font-size: 0.825rem; color: var(--primary-900);">
                 INSERT INTO public.student_availability (student_id, day_of_week, time_period)<br>
-                VALUES ('d3b07384-...', 'wednesday', 'morning');
+                VALUES ('d3b07384-...', 'wednesday', '09:00');
               </div>
             </div>
           </div>
@@ -598,6 +544,7 @@
               <div>
                 <h2 class="card-title">🎯 Lesson Themes &amp; Tactical Modules (Temas de Aula)</h2>
                 <p class="text-muted text-xs">Curriculum topics for padel training sessions. Add, edit, and delete themes dynamically in your browser.</p>
+                <p class="text-muted text-xs">Use the ↑ and ↓ buttons to set the priority order.</p>
               </div>
               <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <input 
@@ -608,9 +555,6 @@
                   style="font-size: 0.8rem; padding: 0.35rem 0.65rem; width: 160px;" 
                   aria-label="Search lesson themes"
                 />
-                <select id="filter-themes-category" class="form-select" style="font-size: 0.8rem; padding: 0.35rem 0.65rem;" aria-label="Filter themes by category">
-                  <option value="all">All Categories</option>
-                </select>
                 <button class="btn btn-sm btn-primary" id="btn-toggle-add-theme" type="button">
                   ➕ Add New Theme
                 </button>
@@ -625,18 +569,6 @@
                   <div>
                     <label for="new-theme-name" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--primary-800); margin-bottom: 0.3rem;">Theme Name (Tema) *</label>
                     <input type="text" id="new-theme-name" class="form-control" placeholder="e.g. Chiquita, Bajada..." required style="width: 100%; font-size: 0.85rem;" />
-                  </div>
-                  <div>
-                    <label for="new-theme-category" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--primary-800); margin-bottom: 0.3rem;">Category (Categoria) *</label>
-                    <input type="text" id="new-theme-category" class="form-control" list="theme-categories-list" placeholder="e.g. Wall Defence" required style="width: 100%; font-size: 0.85rem;" />
-                    <datalist id="theme-categories-list">
-                      <option value="Wall Defence">
-                      <option value="Aerial & Attack">
-                      <option value="Net Play">
-                      <option value="Transition & Defence">
-                      <option value="Tactical & Strategy">
-                      <option value="Serve & Return">
-                    </datalist>
                   </div>
                   <div>
                     <label for="new-theme-desc" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--primary-800); margin-bottom: 0.3rem;">Technical Description &amp; Drills</label>
@@ -661,9 +593,8 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th scope="col" style="min-width: 180px;">Theme (Tema)</th>
-                    <th scope="col" style="min-width: 150px;">Category</th>
-                    <th scope="col">Technical Description &amp; Drills</th>
+                    <th scope="col" style="width: 28%; min-width: 240px;">Theme (Tema)</th>
+                    <th scope="col" style="width: 42%;">Technical Description &amp; Drills</th>
                     <th scope="col" style="width: 110px;">Status</th>
                     <th scope="col" class="text-right" style="min-width: 160px;">Actions</th>
                   </tr>
@@ -679,14 +610,14 @@
           <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-body">
               <h3 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 0.5rem;">
-                🔗 Database Mapping: <code>public.lesson_themes</code> &amp; <code>public.session_themes</code>
+                🔗 Database Mapping: <code>public.lesson_themes</code>, <code>public.session_themes</code> &amp; <code>public.student_lesson_themes</code>
               </h3>
               <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem;">
-                Lesson themes are stored as structured curriculum modules in PostgreSQL, enabling coaches to tag scheduled lessons or student progress:
+                Lesson themes are stored as curriculum modules in PostgreSQL and can be linked to sessions or marked as completed by individual students:
               </p>
               <div style="background-color: var(--neutral-bg); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-family: monospace; font-size: 0.825rem; color: var(--primary-900);">
-                INSERT INTO public.lesson_themes (name, category, description, status)<br>
-                VALUES ('Double Glass', 'Wall Defence', 'Reading corner angles and dual rebounds', 'Active');
+                INSERT INTO public.lesson_themes (name, description, status)<br>
+                VALUES ('Double Glass', 'Reading corner angles and dual rebounds', 'Active');
               </div>
             </div>
           </div>

@@ -12,7 +12,7 @@
  * - Inserir novo tema (Create)
  * - Alterar tema existente (Update / Inline Edit)
  * - Excluir tema (Delete with confirmation)
- * - Filtrar por categoria e busca textual em tempo real
+ * - Search themes in real time
  * - Persistência completa no localStorage
  */
 
@@ -20,35 +20,30 @@ export const DEFAULT_LESSON_THEMES = [
   {
     id: 'theme-double-glass',
     name: 'Double Glass',
-    category: 'Wall Defence',
     description: 'Reading side-to-back and back-to-side rebounds, corner positioning, body rotation, and counter-attacks.',
     status: 'Active'
   },
   {
     id: 'theme-overhead',
     name: 'Overhead',
-    category: 'Aerial & Attack',
     description: 'Mastery of bandeja, víbora, kick smash, and flat smash: footwork, contact point, depth, and placement.',
     status: 'Active'
   },
   {
     id: 'theme-volley',
     name: 'Volley',
-    category: 'Net Play',
     description: 'Forehand and backhand net volleys, low contact blocking, punch volleys, depth control, and footwork.',
     status: 'Active'
   },
   {
     id: 'theme-back-glass',
     name: 'Back Glass',
-    category: 'Wall Defence',
     description: 'Reading deep balls off the rear wall, timing the bounce, proper spacing, defensive lobs, and bajadas.',
     status: 'Active'
   },
   {
     id: 'theme-lob',
     name: 'Lob',
-    category: 'Transition & Defence',
     description: 'Defensive lob height and trajectory to reset points, push opponents off the net, and reclaim court position.',
     status: 'Active'
   }
@@ -58,7 +53,6 @@ const STORAGE_KEY = 'padel_crm_lesson_themes';
 
 let activeEditingThemeId = null;
 let currentSearchTerm = '';
-let currentCategoryFilter = 'all';
 
 /**
  * Returns the list of themes from localStorage or fallback to defaults
@@ -70,7 +64,11 @@ export function getLessonThemes() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        const themesWithoutCategory = parsed.map(({ category, ...theme }) => theme);
+        if (themesWithoutCategory.some((theme, index) => Object.hasOwn(parsed[index], 'category'))) {
+          saveLessonThemes(themesWithoutCategory);
+        }
+        return themesWithoutCategory;
       }
     }
   } catch (err) {
@@ -93,7 +91,7 @@ export function saveLessonThemes(themes) {
 
 /**
  * Inserts a new lesson theme
- * @param {Object} themeData - { name, category, description, status }
+ * @param {Object} themeData - { name, description, status }
  * @returns {Array} Updated themes array
  */
 export function addLessonTheme(themeData) {
@@ -102,7 +100,6 @@ export function addLessonTheme(themeData) {
   const newTheme = {
     id,
     name: themeData.name.trim(),
-    category: themeData.category.trim() || 'General',
     description: (themeData.description || '').trim(),
     status: themeData.status || 'Active'
   };
@@ -125,6 +122,22 @@ export function updateLessonTheme(id, updates) {
     themes[index] = { ...themes[index], ...updates };
     saveLessonThemes(themes);
   }
+  return themes;
+}
+
+/** Moves a theme one position within the currently visible order. */
+export function moveLessonTheme(id, direction, visibleThemeIds) {
+  const themes = getLessonThemes();
+  const visibleIndex = visibleThemeIds.indexOf(id);
+  const targetVisibleId = visibleThemeIds[visibleIndex + direction];
+  if (!targetVisibleId) return themes;
+
+  const currentIndex = themes.findIndex((theme) => theme.id === id);
+  const targetIndex = themes.findIndex((theme) => theme.id === targetVisibleId);
+  if (currentIndex < 0 || targetIndex < 0) return themes;
+
+  [themes[currentIndex], themes[targetIndex]] = [themes[targetIndex], themes[currentIndex]];
+  saveLessonThemes(themes);
   return themes;
 }
 
@@ -157,7 +170,6 @@ export function initLessonThemesUI() {
   const tableBody = document.getElementById('lesson-themes-table-body');
   const countBadge = document.getElementById('lesson-themes-count-badge');
   const searchInput = document.getElementById('search-lesson-themes');
-  const categoryFilter = document.getElementById('filter-themes-category');
   const toggleAddBtn = document.getElementById('btn-toggle-add-theme');
   const addPanel = document.getElementById('add-theme-form-panel');
   const addForm = document.getElementById('form-create-theme');
@@ -165,33 +177,17 @@ export function initLessonThemesUI() {
 
   if (!tableBody) return;
 
-  function updateCategoryFilterOptions(themes) {
-    if (!categoryFilter) return;
-    const categories = Array.from(new Set(themes.map((t) => t.category).filter(Boolean))).sort();
-    const currentVal = categoryFilter.value;
-
-    categoryFilter.innerHTML = '<option value="all">All Categories</option>' +
-      categories.map((cat) => `<option value="${cat}">${cat}</option>`).join('');
-
-    if (categories.includes(currentVal) || currentVal === 'all') {
-      categoryFilter.value = currentVal;
-    }
-  }
-
   function render() {
     const allThemes = getLessonThemes();
-    updateCategoryFilterOptions(allThemes);
 
     // Apply filtering
     let filtered = allThemes.filter((theme) => {
-      const matchesCategory = currentCategoryFilter === 'all' || theme.category === currentCategoryFilter;
       const term = currentSearchTerm.toLowerCase();
       const matchesSearch = !term ||
         theme.name.toLowerCase().includes(term) ||
-        theme.category.toLowerCase().includes(term) ||
         theme.description.toLowerCase().includes(term);
 
-      return matchesCategory && matchesSearch;
+      return matchesSearch;
     });
 
     // Update count badge
@@ -206,7 +202,7 @@ export function initLessonThemesUI() {
     if (filtered.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
             No lesson themes found matching your filter.
             <button class="btn btn-sm btn-ghost" id="btn-clear-theme-filters" style="margin-left: 0.5rem;">
               Clear Filters
@@ -219,9 +215,7 @@ export function initLessonThemesUI() {
       if (clearBtn) {
         clearBtn.addEventListener('click', () => {
           currentSearchTerm = '';
-          currentCategoryFilter = 'all';
           if (searchInput) searchInput.value = '';
-          if (categoryFilter) categoryFilter.value = 'all';
           render();
         });
       }
@@ -229,7 +223,7 @@ export function initLessonThemesUI() {
     }
 
     tableBody.innerHTML = filtered
-      .map((theme) => {
+      .map((theme, filteredIndex) => {
         const isEditing = activeEditingThemeId === theme.id;
         const safeId = theme.id.replace(/[^a-zA-Z0-9_-]/g, '_');
 
@@ -244,17 +238,6 @@ export function initLessonThemesUI() {
                   style="font-size: 0.85rem; padding: 0.35rem 0.5rem; width: 100%; font-weight: 600;" 
                   value="${escapeHtml(theme.name)}"
                   placeholder="Theme name *"
-                  required
-                />
-              </td>
-              <td>
-                <input 
-                  type="text" 
-                  id="input-theme-cat-${safeId}" 
-                  class="form-control" 
-                  style="font-size: 0.85rem; padding: 0.35rem 0.5rem; width: 100%;" 
-                  value="${escapeHtml(theme.category)}"
-                  placeholder="Category *"
                   required
                 />
               </td>
@@ -290,18 +273,10 @@ export function initLessonThemesUI() {
 
         return `
           <tr data-theme-id="${theme.id}">
-            <td>
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 1.1rem;" aria-hidden="true">${getThemeEmoji(theme.name, theme.category)}</span>
-                <strong>${escapeHtml(theme.name)}</strong>
-              </div>
+            <td style="width: 28%;">
+              <strong>${escapeHtml(theme.name)}</strong>
             </td>
-            <td>
-              <span class="tag" style="background-color: var(--border-subtle); color: var(--primary-800); font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);">
-                ${escapeHtml(theme.category)}
-              </span>
-            </td>
-            <td class="text-muted" style="line-height: 1.45; font-size: 0.875rem;">
+            <td class="text-muted" style="width: 42%; line-height: 1.45; font-size: 0.875rem;">
               ${escapeHtml(theme.description) || '<em style="color: #94a3b8;">No technical notes provided</em>'}
             </td>
             <td>
@@ -313,6 +288,12 @@ export function initLessonThemesUI() {
               <button class="btn btn-sm btn-secondary btn-edit-theme" data-id="${theme.id}" title="Edit theme ${escapeHtml(theme.name)}">
                 ✏️ Edit
               </button>
+              <button class="btn btn-sm btn-secondary btn-move-theme" data-id="${theme.id}" data-direction="-1" aria-label="Move ${escapeHtml(theme.name)} up" title="Move up" ${filteredIndex === 0 ? 'disabled' : ''}>
+                ↑
+              </button>
+              <button class="btn btn-sm btn-secondary btn-move-theme" data-id="${theme.id}" data-direction="1" aria-label="Move ${escapeHtml(theme.name)} down" title="Move down" ${filteredIndex === filtered.length - 1 ? 'disabled' : ''}>
+                ↓
+              </button>
               <button class="btn btn-sm btn-outline-danger btn-delete-theme" data-id="${theme.id}" data-name="${escapeHtml(theme.name)}" style="margin-left: 0.35rem;" title="Delete theme ${escapeHtml(theme.name)}">
                 🗑️ Delete
               </button>
@@ -321,6 +302,15 @@ export function initLessonThemesUI() {
         `;
       })
       .join('');
+
+    const visibleThemeIds = filtered.map((theme) => theme.id);
+    tableBody.querySelectorAll('.btn-move-theme').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const { id, direction } = e.currentTarget.dataset;
+        moveLessonTheme(id, Number(direction), visibleThemeIds);
+        render();
+      });
+    });
 
     // Wire up inline edit buttons
     tableBody.querySelectorAll('.btn-edit-theme').forEach((btn) => {
@@ -343,13 +333,11 @@ export function initLessonThemesUI() {
         const id = e.currentTarget.dataset.id;
         const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '_');
         const nameInput = document.getElementById(`input-theme-name-${safeId}`);
-        const catInput = document.getElementById(`input-theme-cat-${safeId}`);
         const descInput = document.getElementById(`input-theme-desc-${safeId}`);
         const statusInput = document.getElementById(`input-theme-status-${safeId}`);
 
         if (nameInput) {
           const newName = nameInput.value.trim();
-          const newCategory = catInput ? catInput.value.trim() : 'General';
           const newDesc = descInput ? descInput.value.trim() : '';
           const newStatus = statusInput ? statusInput.value : 'Active';
 
@@ -361,7 +349,6 @@ export function initLessonThemesUI() {
 
           updateLessonTheme(id, {
             name: newName,
-            category: newCategory || 'General',
             description: newDesc,
             status: newStatus
           });
@@ -406,14 +393,6 @@ export function initLessonThemesUI() {
     });
   }
 
-  // Hook up Category Filter
-  if (categoryFilter) {
-    categoryFilter.addEventListener('change', (e) => {
-      currentCategoryFilter = e.target.value;
-      render();
-    });
-  }
-
   // Hook up Toggle Add Form Button
   if (toggleAddBtn && addPanel) {
     toggleAddBtn.addEventListener('click', () => {
@@ -447,12 +426,10 @@ export function initLessonThemesUI() {
       e.preventDefault();
 
       const nameInput = document.getElementById('new-theme-name');
-      const catInput = document.getElementById('new-theme-category');
       const descInput = document.getElementById('new-theme-desc');
       const statusInput = document.getElementById('new-theme-status');
 
       const name = nameInput ? nameInput.value.trim() : '';
-      const category = catInput ? catInput.value.trim() : '';
       const description = descInput ? descInput.value.trim() : '';
       const status = statusInput ? statusInput.value : 'Active';
 
@@ -464,7 +441,6 @@ export function initLessonThemesUI() {
 
       addLessonTheme({
         name,
-        category: category || 'General',
         description,
         status
       });
@@ -496,22 +472,4 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-/**
- * Helper to pick an intuitive sport emoji based on theme name or category
- * @param {string} name
- * @param {string} category
- * @returns {string}
- */
-function getThemeEmoji(name, category) {
-  const text = (name + ' ' + category).toLowerCase();
-  if (text.includes('double glass') || text.includes('dupla parede')) return '🪟';
-  if (text.includes('overhead') || text.includes('smash') || text.includes('bandeja') || text.includes('víbora')) return '💥';
-  if (text.includes('volley') || text.includes('voleio') || text.includes('net')) return '🎾';
-  if (text.includes('back glass') || text.includes('parede de fundo') || text.includes('wall')) return '🧱';
-  if (text.includes('lob') || text.includes('globo')) return '🚀';
-  if (text.includes('serve') || text.includes('saque')) return '🎯';
-  if (text.includes('chiquita') || text.includes('drop')) return '🪄';
-  return '📋';
 }

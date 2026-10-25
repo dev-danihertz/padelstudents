@@ -686,7 +686,19 @@ button, input, select {
 
 .filter-group {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
   gap: 0.75rem;
+}
+
+.filter-group select,
+.filter-group input {
+  min-width: 145px;
+}
+
+#filter-target-level {
+  width: 130px;
 }
 
 /* Tabs */
@@ -1263,6 +1275,205 @@ button, input, select {
   .db-status-pill {
     display: none; /* Hide on smaller screens to conserve top-bar space */
   }
+}
+
+.student-modal-dialog {
+  max-width: 960px;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.student-modal-body {
+  max-height: calc(100vh - 11rem);
+  overflow-y: auto;
+}
+
+.student-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0 1rem;
+}
+
+.availability-fieldset {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.availability-fieldset > legend,
+.availability-day-group > h3 {
+  color: var(--primary-800);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0 0.35rem;
+}
+
+.availability-day-group + .availability-day-group {
+  border-top: 1px solid var(--border-light);
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+}
+
+.availability-days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.65rem;
+}
+
+.availability-day-card {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem;
+  min-width: 0;
+}
+
+.availability-day-card legend {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0 0.25rem;
+}
+
+.weekly-availability-shortcuts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  margin-bottom: 0.85rem;
+  background: var(--neutral-bg);
+  border-radius: var(--radius-sm);
+}
+
+.weekly-shortcut-label {
+  color: var(--primary-800);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-right: 0.25rem;
+}
+
+.weekly-shortcut-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.weekly-shortcut-choice input {
+  accent-color: var(--accent-600);
+}
+
+.day-period-group + .day-period-group {
+  border-top: 1px solid var(--border-light);
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+}
+
+.availability-group-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.3rem 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.availability-group-toggle input {
+  margin-top: 0.12rem;
+  accent-color: var(--accent-600);
+}
+
+.availability-group-toggle small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.67rem;
+  font-weight: 400;
+}
+
+.availability-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.15rem 0.35rem;
+}
+
+.availability-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.35rem 0.15rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.availability-choice input {
+  margin-top: 0.12rem;
+  accent-color: var(--accent-600);
+}
+
+.availability-choice small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.student-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0 1.5rem 1.25rem;
+}
+
+.student-empty-state {
+  text-align: center;
+  padding: 2rem !important;
+  color: var(--text-muted);
+}
+
+.student-name-link {
+  border: 0;
+  background: transparent;
+  color: var(--primary-900);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.student-name-link:hover {
+  color: var(--accent-600);
+  text-decoration: underline;
+}
+
+.completed-themes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.45rem;
+}
+
+.completed-theme-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.completed-theme-choice input {
+  margin-top: 0.1rem;
+  accent-color: var(--accent-600);
+}
+
+.student-feedback-error {
+  color: var(--danger-text);
 }
 
 @media (max-width: 640px) {

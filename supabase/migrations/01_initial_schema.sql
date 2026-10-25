@@ -59,9 +59,9 @@ CREATE TABLE IF NOT EXISTS public.student_availability (
   student_id UUID NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
   
   day_of_week TEXT NOT NULL 
-    CHECK (day_of_week IN ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday')),
+    CHECK (day_of_week IN ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')),
   time_period TEXT NOT NULL 
-    CHECK (time_period IN ('morning', 'midday', 'afternoon', 'late_afternoon')),
+    CHECK (time_period ~ '^(09|1[0-9]):(00|30)$'),
   
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
 

@@ -3,7 +3,7 @@
  * 
  * Defines the core structure of coaching availability:
  * - Days: Weekdays (Monday to Friday) and Weekends (Saturday and Sunday)
- * - Daily Time Periods: Morning, Midday, Afternoon, Late Afternoon
+ * - Quick-select groups backed by individual 30-minute slots (09:00–20:00)
  * - Client-side in-browser editing with persistent storage
  */
 
@@ -11,7 +11,7 @@ export const DEFAULT_TIME_PERIODS = [
   {
     id: 'morning',
     name: 'Morning',
-    timeWindow: '08:00 – 12:00',
+    timeWindow: '09:00 – 12:00',
     description: 'Early morning & mid-morning coaching sessions, drills and clinics',
     appliesTo: ['weekdays', 'weekends']
   },
@@ -65,7 +65,16 @@ export function getTimePeriods() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      const migrated = parsed.map((period) => (
+        period.id === 'morning' && period.timeWindow === '08:00 – 12:00'
+          ? { ...period, timeWindow: '09:00 – 12:00' }
+          : period
+      ));
+      if (migrated.some((period, index) => period.timeWindow !== parsed[index].timeWindow)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      }
+      return migrated;
     }
   } catch (err) {
     console.warn('Could not read custom time periods from storage:', err);
@@ -114,10 +123,32 @@ export function getAllDays() {
 }
 
 /**
- * Returns a unique slot identifier (e.g. 'wednesday_morning')
+ * Returns a day and period group identifier (e.g. 'wednesday_morning')
  */
 export function getSlotKey(dayId, periodId) {
   return `${dayId}_${periodId}`;
+}
+
+/** Individual 30-minute availability slots from 09:00 through 20:00. */
+export function getTimeSlots() {
+  return Array.from({ length: 22 }, (_, index) => {
+    const startMinutes = 9 * 60 + index * 30;
+    const endMinutes = startMinutes + 30;
+    const formatTime = (minutes) => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+    return { id: formatTime(startMinutes), start: formatTime(startMinutes), end: formatTime(endMinutes) };
+  });
+}
+
+/** Slots fully contained in a bulk-select time group. */
+export function getTimeSlotsForPeriod(period) {
+  const times = String(period.timeWindow).match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+  if (!times) return [];
+  const start = Number(times[1]) * 60 + Number(times[2]);
+  const end = Number(times[3]) * 60 + Number(times[4]);
+  return getTimeSlots().filter((slot) => {
+    const slotStart = Number(slot.start.slice(0, 2)) * 60 + Number(slot.start.slice(3));
+    return slotStart >= start && slotStart + 30 <= end;
+  });
 }
 
 /**
