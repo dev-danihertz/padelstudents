@@ -1294,6 +1294,15 @@ button, input, select {
   gap: 0 1rem;
 }
 
+.student-notes-field {
+  grid-column: 1 / -1;
+}
+
+.student-notes-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
 .availability-fieldset {
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);

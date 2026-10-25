@@ -135,6 +135,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
     form.elements.current_level.value = student?.current_level ?? '2.00';
     form.elements.min_level.value = student?.min_level ?? '2.00';
     form.elements.max_level.value = student?.max_level ?? '2.50';
+    form.elements.general_notes.value = student?.general_notes || '';
     renderAvailabilityChoices(student?.availability || []);
     renderCompletedThemeChoices(student?.completedThemes || []);
     document.getElementById('student-modal-title').textContent = editingStudentId ? `Edit ${student.full_name}` : 'Add Student';
@@ -300,6 +301,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
       email: String(formData.get('email') || '').trim() || null,
       membership_status: formData.get('membership_status'),
       student_status: formData.get('student_status'),
+      general_notes: String(formData.get('general_notes') || '').trim() || null,
       current_level: Number(formData.get('current_level')),
       min_level: minLevel,
       max_level: maxLevel
