@@ -336,12 +336,18 @@ export function initLessonThemesUI(options = {}) {
     return true;
   }
 
-  async function moveTheme(id, direction, visibleThemeIds) {
-    showFeedback(`Arrow click received.\nTheme ID: ${id}\nDirection: ${direction}\nSaving order…`);
+  async function moveTheme(id, requestedPosition) {
+    showFeedback(`Saving the new theme position…\nTheme ID: ${id}\nRequested position: ${requestedPosition}`);
     if (!isConfigured) {
-      themes = moveLessonTheme(id, direction, visibleThemeIds);
+      const reordered = [...themes];
+      const currentIndex = reordered.findIndex((theme) => theme.id === id);
+      if (currentIndex < 0) return false;
+      const [theme] = reordered.splice(currentIndex, 1);
+      reordered.splice(Math.max(0, Math.min(requestedPosition - 1, reordered.length)), 0, theme);
+      themes = reordered.map((item, index) => ({ ...item, sort_order: index + 1 }));
+      saveLessonThemes(themes);
       render();
-      showFeedback('Theme order updated.');
+      showFeedback('Theme position updated.');
       return true;
     }
     if (!hasCloudSession()) {
@@ -349,38 +355,44 @@ export function initLessonThemesUI(options = {}) {
       return false;
     }
     try {
-      await refresh();
-      const term = currentSearchTerm.toLowerCase();
-      const currentVisibleIds = themes.filter((theme) =>
-        !term || String(theme.name || '').toLowerCase().includes(term) || String(theme.description || '').toLowerCase().includes(term)
-      ).map((theme) => theme.id);
-      const visibleIndex = currentVisibleIds.indexOf(id);
-      const targetId = currentVisibleIds[visibleIndex + direction];
-      showFeedback(`Arrow click received.\nTheme ID: ${id}\nDirection: ${direction}\nVisible themes loaded: ${currentVisibleIds.length}\nCurrent position: ${visibleIndex + 1}\nTarget ID: ${targetId || '(none)'}`);
-      if (visibleIndex < 0) {
-        showFeedback('The theme list changed. It has been refreshed; please click the arrow again.', true);
+      const { data: latestThemes, error: loadError } = await supabase.from('lesson_themes')
+        .select('id, name, description, status, sort_order, user_id')
+        .order('sort_order', { ascending: true, nullsFirst: false })
+        .order('name');
+      if (loadError) {
+        showFeedback(`Could not load the current theme order.\n${loadError.message}`, true);
         return false;
       }
-      if (!targetId) {
-        showFeedback('This theme is already at the edge of the displayed list.');
-        return false;
-      }
-      const reordered = [...themes];
+      const reordered = [...(latestThemes || [])];
       const currentIndex = reordered.findIndex((theme) => theme.id === id);
-      const targetIndex = reordered.findIndex((theme) => theme.id === targetId);
-      if (currentIndex < 0 || targetIndex < 0) {
-        showFeedback('The theme list changed. It has been refreshed; please click the arrow again.', true);
+      if (currentIndex < 0) {
+        showFeedback('This theme is no longer in the database. Refresh the page and try again.', true);
         return false;
       }
-      [reordered[currentIndex], reordered[targetIndex]] = [reordered[targetIndex], reordered[currentIndex]];
+      const position = Number(requestedPosition);
+      if (!Number.isInteger(position) || position < 1 || position > reordered.length) {
+        showFeedback(`Choose a position from 1 to ${reordered.length}.`, true);
+        return false;
+      }
+      const [movingTheme] = reordered.splice(currentIndex, 1);
+      reordered.splice(position - 1, 0, movingTheme);
+      if (currentIndex === position - 1) {
+        themes = latestThemes || [];
+        saveLessonThemes(themes);
+        render();
+        showFeedback(`${movingTheme.name} is already in position ${position}.`);
+        return true;
+      }
       for (let index = 0; index < reordered.length; index += 1) {
+        showFeedback(`Saving new order…\nUpdating theme ${index + 1} of ${reordered.length}: ${reordered[index].name}`);
         const { data, error } = await supabase.from('lesson_themes')
           .update({ sort_order: index + 1 })
           .eq('id', reordered[index].id)
           .select('id')
           .maybeSingle();
         if (error || !data) {
-          await refresh();
+          themes = latestThemes || themes;
+          render();
           showFeedback(`Could not save the new order.\nDatabase error: ${error?.message || '(none)'}\nUpdated row returned: ${data?.id || '(none)'}\nTheme being updated: ${reordered[index].id}`, true);
           return false;
         }
@@ -388,7 +400,7 @@ export function initLessonThemesUI(options = {}) {
       themes = reordered.map((theme, index) => ({ ...theme, sort_order: index + 1 }));
       saveLessonThemes(themes);
       render();
-      showFeedback(`Theme order saved successfully.\nMoved theme: ${id}\nDirection: ${direction}\nRows updated: ${reordered.length}`);
+      showFeedback(`Theme order saved.\n${movingTheme.name} is now in position ${position}.`);
       return true;
     } catch (error) {
       console.error('Could not reorder lesson themes:', error);
@@ -511,12 +523,12 @@ export function initLessonThemesUI(options = {}) {
               <button class="btn btn-sm btn-secondary btn-edit-theme" data-id="${theme.id}" title="Edit theme ${escapeHtml(theme.name)}">
                 ✏️ Edit
               </button>
-              <button type="button" class="btn btn-sm btn-secondary btn-move-theme" data-id="${theme.id}" data-direction="-1" aria-label="Move ${escapeHtml(theme.name)} up" title="Move up" ${filteredIndex === 0 ? 'disabled' : ''}>
-                ↑
-              </button>
-              <button type="button" class="btn btn-sm btn-secondary btn-move-theme" data-id="${theme.id}" data-direction="1" aria-label="Move ${escapeHtml(theme.name)} down" title="Move down" ${filteredIndex === filtered.length - 1 ? 'disabled' : ''}>
-                ↓
-              </button>
+              <label style="display: inline-flex; align-items: center; gap: 0.3rem; margin: 0 0.35rem; font-size: 0.75rem;">
+                Position
+                <select class="form-select theme-position-select" data-id="${theme.id}" aria-label="Position for ${escapeHtml(theme.name)}" style="width: 72px; padding: 0.3rem;" ${themes.length < 2 ? 'disabled' : ''}>
+                  ${themes.map((_, index) => `<option value="${index + 1}" ${index + 1 === orderNumber ? 'selected' : ''}>${index + 1}</option>`).join('')}
+                </select>
+              </label>
               <button class="btn btn-sm btn-outline-danger btn-delete-theme" data-id="${theme.id}" data-name="${escapeHtml(theme.name)}" style="margin-left: 0.35rem;" title="Delete theme ${escapeHtml(theme.name)}">
                 🗑️ Delete
               </button>
@@ -526,19 +538,16 @@ export function initLessonThemesUI(options = {}) {
       })
       .join('');
 
-    const visibleThemeIds = filtered.map((theme) => theme.id);
-    tableBody.querySelectorAll('.btn-move-theme').forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        btn.disabled = true;
-        const { id, direction } = e.currentTarget.dataset;
-        showFeedback(`Button handler ran.\nTheme ID: ${id}\nDirection: ${direction}\nStarting reorder…`);
+    tableBody.querySelectorAll('.theme-position-select').forEach((select) => {
+      select.addEventListener('change', async (event) => {
+        const control = event.currentTarget;
+        const { id } = control.dataset;
+        const requestedPosition = Number(control.value);
+        tableBody.querySelectorAll('.theme-position-select').forEach((item) => { item.disabled = true; });
         try {
-          await moveTheme(id, Number(direction), visibleThemeIds);
+          await moveTheme(id, requestedPosition);
         } finally {
-          // render() replaces the row buttons after a successful move.
-          if (btn.isConnected) btn.disabled = false;
+          tableBody.querySelectorAll('.theme-position-select').forEach((item) => { item.disabled = themes.length < 2; });
         }
       });
     });
