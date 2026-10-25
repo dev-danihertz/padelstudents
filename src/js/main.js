@@ -11,6 +11,7 @@ import { supabase, isSupabaseConfigured } from './supabaseClient.js';
 import { signIn, signUp, signOut, getSession, onAuthStateChange } from './auth.js';
 import { initTimePeriodsUI } from './availability.js';
 import { initLessonFormatsUI } from './lessonFormats.js';
+import { initLessonThemesUI } from './lessonThemes.js';
 import { initPadelLevelsUI } from './padelLevels.js';
 
 // View configurations containing human-readable titles and descriptions
@@ -465,6 +466,22 @@ function setupEventHandlers() {
       });
     });
   }
+
+  // Scroll navigation tabs inside Tables view
+  document.querySelectorAll('[data-scroll-to]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = btn.dataset.scrollTo;
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (btn.parentElement) {
+          btn.parentElement.querySelectorAll('.tab-button').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+        }
+      }
+    });
+  });
 }
 
 /**
@@ -475,6 +492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventHandlers();
   initTimePeriodsUI();
   initLessonFormatsUI();
+  initLessonThemesUI();
   initPadelLevelsUI();
 
   // Listen for hash changes in URL
