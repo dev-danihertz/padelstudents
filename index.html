@@ -129,7 +129,7 @@
           </div>
 
           <!-- KPI Stats Grid -->
-          <div class="metrics-grid">
+          <div class="metrics-grid dashboard-summary-grid">
             <div class="metric-card">
               <div class="metric-header">
                 <span class="metric-title">Active Students</span>
@@ -141,15 +141,6 @@
 
             <div class="metric-card">
               <div class="metric-header">
-                <span class="metric-title">Club Members</span>
-                <span class="metric-icon">🏷️</span>
-              </div>
-              <div class="metric-value" id="dashboard-member-count">0</div>
-              <div class="metric-footer text-muted"><span>Students marked as club members</span></div>
-            </div>
-
-            <div class="metric-card">
-              <div class="metric-header">
                 <span class="metric-title">Average Playing Level</span>
                 <span class="metric-icon">📈</span>
               </div>
@@ -157,68 +148,15 @@
               <div class="metric-footer text-muted"><span>Average of non-archived students</span></div>
             </div>
 
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-title">Do Not Contact</span>
-                <span class="metric-icon">🔴</span>
-              </div>
-              <div class="metric-value" id="dashboard-opt-out-count">0</div>
-              <div class="metric-footer text-warning"><span>Students opted out of marketing</span></div>
-            </div>
           </div>
 
-          <!-- Quick Navigation & Roadmap -->
-          <div class="dashboard-grid">
-            <div class="card">
-              <div class="card-header">
-                <h2 class="card-title">Quick Actions</h2>
-              </div>
-              <div class="card-body action-grid">
-                <a href="#students" class="action-tile" data-view="students">
-                  <div class="action-tile-icon">👥</div>
-                  <div class="action-tile-text">
-                    <strong>View Student Directory</strong>
-                    <p>Review contact details, levels, and lesson formats.</p>
-                  </div>
-                </a>
-                <a href="#find-players" class="action-tile" data-view="find-players">
-                  <div class="action-tile-icon">🎯</div>
-                  <div class="action-tile-text">
-                    <strong>Match Group Players</strong>
-                    <p>Pair compatible players by overlapping levels and availability.</p>
-                  </div>
-                </a>
-                <a href="#settings" class="action-tile" data-view="settings">
-                  <div class="action-tile-icon">⚙️</div>
-                  <div class="action-tile-text">
-                    <strong>Inspect Supabase Connection</strong>
-                    <p>Check your cloud database credentials and table statuses.</p>
-                  </div>
-                </a>
-              </div>
+          <div class="card dashboard-level-card">
+            <div class="card-header">
+              <h2 class="card-title">Players by Acceptable Group Level</h2>
+              <p class="text-muted text-xs">Active and occasional students are counted at every 0.25 level included in their acceptable group range.</p>
             </div>
-
-            <div class="card">
-              <div class="card-header">
-                <h2 class="card-title">Roster Snapshot</h2>
-              </div>
-              <div class="card-body">
-                <dl class="dashboard-roster-stats">
-                  <div><dt>Active</dt><dd id="dashboard-status-active">0</dd></div>
-                  <div><dt>Occasional</dt><dd id="dashboard-status-occasional">0</dd></div>
-                  <div><dt>Archived</dt><dd id="dashboard-status-archived">0</dd></div>
-                </dl>
-                <div class="dashboard-availability">
-                  <div class="dashboard-availability-heading">
-                    <strong>Weekly availability recorded</strong>
-                    <span id="dashboard-availability-count">0 of 0</span>
-                  </div>
-                  <div class="dashboard-progress-track" role="progressbar" aria-label="Students with weekly availability" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dashboard-availability-progress">
-                    <span></span>
-                  </div>
-                  <p class="text-muted text-xs">Active and occasional students with at least one time slot selected.</p>
-                </div>
-              </div>
+            <div class="card-body">
+              <div class="level-distribution-grid" id="dashboard-level-distribution" aria-live="polite"></div>
             </div>
           </div>
         </section>

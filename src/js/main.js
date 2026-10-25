@@ -100,31 +100,22 @@ function updateDashboardMetrics(students = []) {
   const statusOf = (student) => student.student_status || 'active';
   const roster = students.filter((student) => statusOf(student) !== 'archived');
   const active = students.filter((student) => statusOf(student) === 'active');
-  const occasional = students.filter((student) => statusOf(student) === 'occasional');
-  const archived = students.filter((student) => statusOf(student) === 'archived');
-  const members = roster.filter((student) => student.membership_status === 'member').length;
-  const optedOut = roster.filter((student) => student.do_not_send_marketing === true).length;
   const averageLevel = roster.length
     ? (roster.reduce((sum, student) => sum + Number(student.current_level || 0), 0) / roster.length).toFixed(2)
     : '—';
-  const withAvailability = roster.filter((student) => ['active', 'occasional'].includes(statusOf(student)) && (student.availability || []).length > 0).length;
-  const availabilityRoster = active.length + occasional.length;
-  const availabilityPercent = availabilityRoster ? Math.round((withAvailability / availabilityRoster) * 100) : 0;
-
   setText('dashboard-active-count', active.length);
-  setText('dashboard-member-count', members);
   setText('dashboard-average-level', averageLevel);
-  setText('dashboard-opt-out-count', optedOut);
-  setText('dashboard-status-active', active.length);
-  setText('dashboard-status-occasional', occasional.length);
-  setText('dashboard-status-archived', archived.length);
-  setText('dashboard-availability-count', `${withAvailability} of ${availabilityRoster}`);
-  const progress = document.getElementById('dashboard-availability-progress');
-  if (progress) {
-    progress.setAttribute('aria-valuenow', String(availabilityPercent));
-    const bar = progress.querySelector('span');
-    if (bar) bar.style.width = `${availabilityPercent}%`;
-  }
+
+  const levelDistribution = document.getElementById('dashboard-level-distribution');
+  if (!levelDistribution) return;
+  const eligibleStudents = students.filter((student) => ['active', 'occasional'].includes(statusOf(student)));
+  const levels = Array.from({ length: 13 }, (_, index) => (index + 2) / 4);
+  levelDistribution.innerHTML = levels.map((level) => {
+    const count = eligibleStudents.filter((student) =>
+      Number(student.min_level) <= level && Number(student.max_level) >= level
+    ).length;
+    return `<div class="level-count-tile"><span class="level-count-label">${Number(level.toFixed(2))}</span><strong>${count}</strong><span class="level-count-caption">${count === 1 ? 'player' : 'players'}</span></div>`;
+  }).join('');
 }
 
 /**

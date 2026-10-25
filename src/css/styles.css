@@ -549,165 +549,53 @@ button, input, select {
 .text-xs { font-size: 0.75rem; }
 .text-right { text-align: right; }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+.metrics-grid.dashboard-summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.dashboard-roster-stats {
+.dashboard-level-card {
+  margin-bottom: 1.25rem;
+}
+
+.dashboard-level-card .card-header p {
+  margin-top: 0.3rem;
+  max-width: 70ch;
+}
+
+.level-distribution-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
   gap: 0.65rem;
 }
 
-.dashboard-roster-stats > div {
-  padding: 0.8rem;
+.level-count-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.75rem 0.45rem;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
   background: var(--neutral-bg);
+  text-align: center;
 }
 
-.dashboard-roster-stats dt {
+.level-count-label {
   color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.dashboard-roster-stats dd {
-  margin-top: 0.15rem;
-  color: var(--primary-900);
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-.dashboard-availability {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-light);
-}
-
-.dashboard-availability-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.55rem;
-  font-size: 0.85rem;
-}
-
-.dashboard-availability-heading span {
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.dashboard-progress-track {
-  height: 0.65rem;
-  overflow: hidden;
-  margin-bottom: 0.55rem;
-  border-radius: var(--radius-full);
-  background: var(--border-subtle);
-}
-
-.dashboard-progress-track span {
-  display: block;
-  width: 0;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent-600);
-  transition: width 0.25s ease;
-}
-
-.action-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.action-tile {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-light);
-  background-color: var(--neutral-bg);
-  transition: all 0.15s ease;
-}
-
-.action-tile:hover {
-  background-color: #ffffff;
-  border-color: var(--accent-500);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.action-tile-icon {
-  font-size: 1.75rem;
-}
-
-.action-tile-text strong {
-  display: block;
-  font-size: 0.95rem;
-  color: var(--primary-900);
-  margin-bottom: 0.15rem;
-}
-
-.action-tile-text p {
-  font-size: 0.825rem;
-  color: var(--text-muted);
-}
-
-.roadmap-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.roadmap-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-}
-
-.roadmap-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.roadmap-item.completed .roadmap-icon {
-  background-color: var(--accent-100);
-  color: var(--accent-600);
-}
-
-.roadmap-item.pending .roadmap-icon {
-  background-color: var(--court-blue-light);
-  color: var(--court-blue);
-}
-
-.roadmap-item.upcoming .roadmap-icon {
-  background-color: var(--border-subtle);
-  color: var(--text-light);
-}
-
-.roadmap-item strong {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--primary-900);
-}
-
-.roadmap-item p {
   font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.level-count-tile strong {
+  color: var(--primary-900);
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.level-count-caption {
   color: var(--text-muted);
+  font-size: 0.7rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -1319,10 +1207,6 @@ button, input, select {
     margin-left: 0;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-
   .controls-row {
     flex-direction: column;
     align-items: stretch;
@@ -1859,9 +1743,17 @@ button, input, select {
   }
 
   .settings-grid,
-  .tables-view-grid,
-  .dashboard-grid {
+  .tables-view-grid {
     gap: 0.85rem;
+  }
+
+  .metrics-grid.dashboard-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .level-distribution-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
   }
 
   .card-header,
