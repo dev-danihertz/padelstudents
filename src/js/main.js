@@ -38,8 +38,8 @@ const VIEW_METADATA = {
     subtitle: 'Manage system lookup tables, weekly availability, and time periods.'
   },
   settings: {
-    title: 'Settings',
-    subtitle: 'Configure coaching parameters and system settings.'
+    title: 'Status',
+    subtitle: 'Check Supabase connectivity and the current site deployment.'
   }
 };
 
@@ -274,7 +274,7 @@ function updateConnectionUI() {
     }
     if (dashIcon) dashIcon.textContent = '⚠️';
     if (dashBody) {
-      dashBody.innerHTML = '<strong>Supabase Cloud Database Not Linked:</strong> Create a <code>.env</code> file from <code>.env.example</code> with your project URL and public key. Visit the <a href="#settings" style="text-decoration: underline; font-weight: 600;">Settings</a> tab for instructions.';
+      dashBody.innerHTML = '<strong>Supabase Cloud Database Not Linked:</strong> Configure the Supabase project URL and public key, then visit the <a href="#settings" style="text-decoration: underline; font-weight: 600;">Status</a> page to check the connection.';
     }
   } else if (!currentUser) {
     // 2. Configured, but coach is not signed in
@@ -344,6 +344,72 @@ function updateConnectionUI() {
   }
 }
 
+function formatStatusTime(value) {
+  if (!value) return 'Not available';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not available';
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+  }).format(date);
+}
+
+async function checkSupabaseStatus() {
+  const statusText = document.getElementById('settings-connection-text');
+  const statusSubtext = document.getElementById('settings-connection-subtext');
+  const statusDot = document.getElementById('settings-dot');
+  const checkedAt = document.getElementById('settings-last-check');
+  const lastStudentUpdate = document.getElementById('settings-last-student-update');
+  const checkButton = document.getElementById('btn-refresh-status');
+  if (!statusText) return;
+
+  if (!isSupabaseConfigured) {
+    statusText.textContent = 'Not configured';
+    statusSubtext.textContent = 'Supabase project credentials are not configured for this site.';
+    statusDot.className = 'status-dot status-unconfigured';
+    checkedAt.textContent = 'Not checked';
+    lastStudentUpdate.textContent = 'Not available';
+    return;
+  }
+
+  statusText.textContent = 'Checking Supabase…';
+  statusSubtext.textContent = 'Testing database access now.';
+  if (checkButton) checkButton.disabled = true;
+  try {
+    if (!currentUser) {
+      statusText.textContent = 'Configured; sign in to verify database access';
+      statusSubtext.textContent = 'The project credentials are present. A signed-in session is needed to check protected student records.';
+      statusDot.className = 'status-dot status-connected';
+      lastStudentUpdate.textContent = 'Sign in to check';
+    } else {
+      const { data, error } = await supabase.from('students')
+        .select('updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      statusText.textContent = 'Connected and database access verified';
+      statusSubtext.textContent = `Supabase responded successfully for ${currentUser.email || 'your coach account'}.`;
+      statusDot.className = 'status-dot status-connected';
+      lastStudentUpdate.textContent = data?.updated_at ? formatStatusTime(data.updated_at) : 'No student records yet';
+    }
+    checkedAt.textContent = formatStatusTime(new Date());
+  } catch (error) {
+    statusText.textContent = 'Supabase check failed';
+    statusSubtext.textContent = error?.message || 'Could not reach the database.';
+    statusDot.className = 'status-dot status-unconfigured';
+    checkedAt.textContent = formatStatusTime(new Date());
+    lastStudentUpdate.textContent = 'Check failed';
+  } finally {
+    if (checkButton) checkButton.disabled = false;
+  }
+}
+
+function showDeploymentStatus() {
+  const buildTime = document.getElementById('vercel-build-time');
+  if (buildTime) buildTime.textContent = formatStatusTime(__APP_BUILD_TIME__);
+}
+
 /**
  * Auth Modal handling
  */
@@ -353,7 +419,7 @@ function openAuthModal() {
     alert(
       'Supabase Configuration Required:\n\n' +
       'Please create a .env file with your VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY first.\n' +
-      'See the Settings page for full step-by-step instructions.'
+      'Visit the Status page to check the Supabase connection.'
     );
     return;
   }
@@ -497,6 +563,8 @@ function setupEventHandlers() {
     });
   }
 
+  document.getElementById('btn-refresh-status')?.addEventListener('click', checkSupabaseStatus);
+
   // Scroll navigation tabs inside Tables view
   document.querySelectorAll('[data-scroll-to]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -551,6 +619,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const themesRefresh = lessonThemesUI?.refresh();
         if (themesRefresh) themesRefresh.then(() => studentsUI?.refresh());
         else studentsUI?.refresh();
+        checkSupabaseStatus();
       }, 0);
       console.log(`🔐 Supabase Auth Event: ${event}`, currentUser?.email);
     });
@@ -574,6 +643,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initial UI refresh
   updateConnectionUI();
+  showDeploymentStatus();
+  await checkSupabaseStatus();
 
   console.log('🎾 Padel Coach CRM Initialised (Phase 2: Supabase Integration)');
 });

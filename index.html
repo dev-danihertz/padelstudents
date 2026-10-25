@@ -66,8 +66,8 @@
           </li>
           <li class="nav-item">
             <a href="#settings" class="nav-link" data-view="settings">
-              <span class="nav-icon" aria-hidden="true">⚙️</span>
-              <span class="nav-label">Settings</span>
+              <span class="nav-icon" aria-hidden="true">📡</span>
+              <span class="nav-label">Status</span>
             </a>
           </li>
         </ul>
@@ -573,13 +573,12 @@
 
         </section>
 
-        <!-- 6. SETTINGS VIEW -->
+        <!-- 6. STATUS VIEW -->
         <section class="view-panel" id="view-settings">
           <div class="settings-grid">
-            <!-- Supabase Cloud Connection Status Card -->
             <div class="card">
               <div class="card-header">
-                <h2 class="card-title">Supabase Cloud Database Status</h2>
+                <h2 class="card-title">Supabase</h2>
               </div>
               <div class="card-body">
                 <div class="connection-status-box" id="settings-status-box">
@@ -587,9 +586,7 @@
                     <span class="status-dot" id="settings-dot"></span>
                     <strong id="settings-connection-text">Detecting configuration...</strong>
                   </div>
-                  <p class="text-muted text-xs" id="settings-connection-subtext">
-                    Checking for <code>.env</code> file with <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_PUBLISHABLE_KEY</code>.
-                  </p>
+                  <p class="text-muted text-xs" id="settings-connection-subtext">Checking connection…</p>
                 </div>
 
                 <div class="connection-details-table">
@@ -602,62 +599,42 @@
                     <span class="detail-val" id="settings-key-display">Not configured</span>
                   </div>
                   <div class="detail-row">
-                    <span class="detail-key">Auth State:</span>
+                    <span class="detail-key">Account:</span>
                     <span class="detail-val" id="settings-auth-display">Not logged in</span>
                   </div>
+                  <div class="detail-row">
+                    <span class="detail-key">Last connection check:</span>
+                    <span class="detail-val" id="settings-last-check">Not checked yet</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-key">Last student record update:</span>
+                    <span class="detail-val" id="settings-last-student-update">Not available</span>
+                  </div>
                 </div>
-
-                <div class="settings-guide-box">
-                  <h3>How to link your Supabase project:</h3>
-                  <ol class="guide-steps">
-                    <li>Create a copy of <code>.env.example</code> named <code>.env</code> in your project root.</li>
-                    <li>In your Supabase dashboard, open <strong>Connect</strong> or <strong>Project Settings &rarr; API Keys</strong>.</li>
-                    <li>Copy your <strong>Project URL</strong> and <strong>publishable key</strong> into your <code>.env</code> file.</li>
-                    <li>Restart the Vite server (or save the file) and refresh this page.</li>
-                  </ol>
-                </div>
+                <p class="text-muted text-xs">The record timestamp covers student records. The connection check verifies access to Supabase now.</p>
+                <button type="button" class="btn btn-sm btn-secondary" id="btn-refresh-status">Check Supabase again</button>
               </div>
             </div>
 
-            <!-- Database Migration Checklist Card -->
             <div class="card">
               <div class="card-header">
-                <h2 class="card-title">Database Schema &amp; Migration</h2>
+                <h2 class="card-title">Vercel deployment</h2>
               </div>
               <div class="card-body">
-                <p class="text-muted" style="margin-bottom: 1rem;">
-                  Your migration script <code>supabase/migrations/01_initial_schema.sql</code> is ready to run in the Supabase SQL Editor.
-                </p>
-                <div class="schema-checklist">
-                  <div class="checklist-item">
-                    <span class="checklist-icon">📄</span>
-                    <div>
-                      <strong>students table</strong>
-                      <p>Core profile, levels (min/max range constraint), contact prefs, notes.</p>
-                    </div>
+                <div class="connection-status-box">
+                  <div class="status-indicator-row">
+                    <span class="status-dot status-connected" id="vercel-status-dot"></span>
+                    <strong id="vercel-status-text">This page is being served.</strong>
                   </div>
-                  <div class="checklist-item">
-                    <span class="checklist-icon">⏰</span>
-                    <div>
-                      <strong>student_availability table</strong>
-                      <p>Day of week + time period slots (Morning, Midday, Afternoon, etc.).</p>
-                    </div>
-                  </div>
-                  <div class="checklist-item">
-                    <span class="checklist-icon">🎾</span>
-                    <div>
-                      <strong>student_lesson_preferences table</strong>
-                      <p>Format preferences (1:1, 1:2, 1:3, 1:4).</p>
-                    </div>
-                  </div>
-                  <div class="checklist-item">
-                    <span class="checklist-icon">🔒</span>
-                    <div>
-                      <strong>Row Level Security (RLS)</strong>
-                      <p>Policies restricting all queries to <code>auth.uid() = user_id</code>.</p>
-                    </div>
+                  <p class="text-muted text-xs">The current page loaded successfully. This confirms the deployed app is responding.</p>
+                </div>
+                <div class="connection-details-table">
+                  <div class="detail-row">
+                    <span class="detail-key">Current deployment built:</span>
+                    <span class="detail-val" id="vercel-build-time">Reading build information…</span>
                   </div>
                 </div>
+                <p class="text-muted text-xs">This shows when this app build was created. Vercel’s overall platform health is not queried here.</p>
               </div>
             </div>
           </div>
