@@ -322,18 +322,48 @@
           </div>
         </div>
 
-        <!-- 3. FIND PLAYERS VIEW (Placeholder) -->
+        <!-- 3. FIND PLAYERS VIEW -->
         <section class="view-panel" id="view-find-players">
-          <div class="card placeholder-card">
-            <div class="placeholder-icon">🎯</div>
-            <h2>Find Compatible Players</h2>
-            <p class="placeholder-desc">
-              This feature will be built in <strong>Phase 5</strong>. It will allow you to select a proposed lesson time slot (e.g. Wednesday morning), format (e.g. 1:3), and target level range (e.g. 2.0 &ndash; 2.5), and instantly surface all matching students with overlapping availability and compatible ratings.
-            </p>
-            <div class="matching-preview-box">
-              <h3>Matching Algorithm Rule:</h3>
-              <p>A student matches when their acceptable level range <code>[StudentMin, StudentMax]</code> overlaps with your proposed session range <code>[SessionMin, SessionMax]</code>.</p>
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Find Players</h2>
+                <p class="text-muted text-xs">Choose the proposed lesson level range, day and time to find available students.</p>
+              </div>
             </div>
+            <div class="card-body">
+              <div class="player-search-filters">
+                <label class="form-group">Lesson level from
+                  <select id="find-level-min" class="form-select" aria-label="Lesson level minimum"></select>
+                </label>
+                <label class="form-group">to
+                  <select id="find-level-max" class="form-select" aria-label="Lesson level maximum"></select>
+                </label>
+                <label class="form-group">Day
+                  <select id="find-day" class="form-select" aria-label="Available day">
+                    <option value="all">Any day</option>
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                    <option value="sunday">Sunday</option>
+                  </select>
+                </label>
+                <label class="form-group">Time
+                  <select id="find-time" class="form-select" aria-label="Available time">
+                    <option value="all">Any time</option>
+                  </select>
+                </label>
+                <button type="button" id="btn-refresh-player-results" class="btn btn-sm btn-secondary">Refresh students</button>
+              </div>
+              <p id="find-players-info" class="text-muted text-xs" role="status" aria-live="polite"></p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2 class="card-title">Matching students <span class="badge badge-member" id="find-players-count">0</span></h2></div>
+            <div id="find-players-results" class="player-results-list"></div>
           </div>
         </section>
 

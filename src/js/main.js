@@ -14,6 +14,7 @@ import { initLessonFormatsUI } from './lessonFormats.js';
 import { initLessonThemesUI } from './lessonThemes.js';
 import { initPadelLevelsUI } from './padelLevels.js';
 import { initStudentsUI } from './students.js';
+import { initFindPlayersUI } from './findPlayers.js';
 
 // View configurations containing human-readable titles and descriptions
 const VIEW_METADATA = {
@@ -48,6 +49,7 @@ let currentUser = null;
 let authMode = 'signin'; // 'signin' or 'signup'
 let studentsUI = null;
 let lessonThemesUI = null;
+let findPlayersUI = null;
 
 function setupCollapsibleTables() {
   document.querySelectorAll('#view-tables > .card:not(.table-controls-card)').forEach((card) => {
@@ -124,6 +126,7 @@ function navigateTo(viewId) {
 
   // 5. If mobile sidebar is open, close it on navigation
   closeMobileSidebar();
+  if (targetId === 'find-players') findPlayersUI?.refresh();
 }
 
 function updateDashboardMetrics(students = []) {
@@ -620,6 +623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (themesRefresh) themesRefresh.then(() => studentsUI?.refresh());
         else studentsUI?.refresh();
         checkSupabaseStatus();
+        findPlayersUI?.refresh();
       }, 0);
       console.log(`🔐 Supabase Auth Event: ${event}`, currentUser?.email);
     });
@@ -640,6 +644,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     getTimePeriods,
     onStudentsUpdated: updateDashboardMetrics
   });
+
+  findPlayersUI = initFindPlayersUI({
+    supabase,
+    isSupabaseConfigured,
+    getCurrentUser: () => currentUser
+  });
+  await findPlayersUI?.refresh();
 
   // Initial UI refresh
   updateConnectionUI();
