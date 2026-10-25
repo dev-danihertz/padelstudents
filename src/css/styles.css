@@ -662,6 +662,14 @@ button, input, select {
   font-size: 0.7rem;
 }
 
+.theme-order-cell {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: center;
+}
+
 /* --------------------------------------------------------------------------
    Students View Components
    -------------------------------------------------------------------------- */

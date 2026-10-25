@@ -202,7 +202,7 @@ export function initLessonThemesUI() {
     if (filtered.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
             No lesson themes found matching your filter.
             <button class="btn btn-sm btn-ghost" id="btn-clear-theme-filters" style="margin-left: 0.5rem;">
               Clear Filters
@@ -226,10 +226,12 @@ export function initLessonThemesUI() {
       .map((theme, filteredIndex) => {
         const isEditing = activeEditingThemeId === theme.id;
         const safeId = theme.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const orderNumber = allThemes.findIndex((item) => item.id === theme.id) + 1;
 
         if (isEditing) {
           return `
             <tr style="background-color: var(--accent-50);">
+              <td class="theme-order-cell">${orderNumber}</td>
               <td>
                 <input 
                   type="text" 
@@ -273,6 +275,7 @@ export function initLessonThemesUI() {
 
         return `
           <tr data-theme-id="${theme.id}">
+            <td class="theme-order-cell">${orderNumber}</td>
             <td style="width: 28%;">
               <strong>${escapeHtml(theme.name)}</strong>
             </td>
