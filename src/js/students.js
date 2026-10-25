@@ -136,6 +136,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
     form.elements.min_level.value = student?.min_level ?? '2.00';
     form.elements.max_level.value = student?.max_level ?? '2.50';
     form.elements.general_notes.value = student?.general_notes || '';
+    form.elements.do_not_send_marketing.checked = student?.do_not_send_marketing === true;
     renderAvailabilityChoices(student?.availability || []);
     renderCompletedThemeChoices(student?.completedThemes || []);
     document.getElementById('student-modal-title').textContent = editingStudentId ? `Edit ${student.full_name}` : 'Add Student';
@@ -265,7 +266,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
       const membershipClass = student.membership_status === 'member' ? 'badge-member' : student.membership_status === 'non-member' ? 'badge-non-member' : 'badge-unknown';
       const statusClass = status === 'active' ? 'badge-status-active' : status === 'occasional' ? 'badge-status-occasional' : 'badge-status-inactive';
       return `<tr>
-        <td class="student-name-cell"><button type="button" class="student-name-link btn-edit-student" data-id="${escapeHtml(student.id)}" aria-label="Edit ${escapeHtml(student.full_name)}">${escapeHtml(student.full_name)}</button></td>
+        <td class="student-name-cell"><button type="button" class="student-name-link btn-edit-student" data-id="${escapeHtml(student.id)}" aria-label="Edit ${escapeHtml(student.full_name)}">${escapeHtml(student.full_name)}</button>${student.do_not_send_marketing ? '<span class="marketing-opt-out-indicator" role="img" aria-label="Não enviar mensagens de marketing" title="Não enviar mensagens de marketing"></span>' : ''}</td>
         <td data-label="Membership"><span class="badge ${membershipClass}">${membershipLabel}</span></td>
         <td data-label="Level"><span class="level-pill">${Number(student.current_level || 0).toFixed(2)}</span></td>
         <td data-label="Acceptable Group Range"><span class="range-text">${Number(student.min_level || 0).toFixed(2)} – ${Number(student.max_level || 0).toFixed(2)}</span></td>
@@ -301,6 +302,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
       email: String(formData.get('email') || '').trim() || null,
       membership_status: formData.get('membership_status'),
       student_status: formData.get('student_status'),
+      do_not_send_marketing: formData.get('do_not_send_marketing') === 'on',
       general_notes: String(formData.get('general_notes') || '').trim() || null,
       current_level: Number(formData.get('current_level')),
       min_level: minLevel,
