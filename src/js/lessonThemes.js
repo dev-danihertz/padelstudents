@@ -188,7 +188,8 @@ export function initLessonThemesUI(options = {}) {
   function showFeedback(message, isError = false) {
     if (!feedback) return;
     feedback.textContent = message;
-    feedback.style.color = isError ? 'var(--danger-700, #b91c1c)' : 'var(--text-muted)';
+    feedback.style.color = isError ? '#991b1b' : '#1e3a8a';
+    feedback.style.backgroundColor = isError ? '#fee2e2' : '#dbeafe';
     feedback.style.display = message ? 'block' : 'none';
   }
 
@@ -206,6 +207,7 @@ export function initLessonThemesUI(options = {}) {
     let { data, error } = await selectThemes();
     if (error) {
       console.error('Could not load lesson themes from Supabase:', error);
+      showFeedback(`Unable to load themes from Supabase.\n${error.message || JSON.stringify(error)}`, true);
       return themes;
     }
 
@@ -256,6 +258,7 @@ export function initLessonThemesUI(options = {}) {
     ({ data, error } = await selectThemes());
     if (error) {
       console.error('Could not refresh lesson themes from Supabase:', error);
+      showFeedback(`Unable to refresh themes from Supabase.\n${error.message || JSON.stringify(error)}`, true);
       return themes;
     }
     themes = data || [];
@@ -334,7 +337,7 @@ export function initLessonThemesUI(options = {}) {
   }
 
   async function moveTheme(id, direction, visibleThemeIds) {
-    showFeedback('Updating theme order…');
+    showFeedback(`Arrow click received.\nTheme ID: ${id}\nDirection: ${direction}\nSaving order…`);
     if (!isConfigured) {
       themes = moveLessonTheme(id, direction, visibleThemeIds);
       render();
@@ -353,6 +356,7 @@ export function initLessonThemesUI(options = {}) {
       ).map((theme) => theme.id);
       const visibleIndex = currentVisibleIds.indexOf(id);
       const targetId = currentVisibleIds[visibleIndex + direction];
+      showFeedback(`Arrow click received.\nTheme ID: ${id}\nDirection: ${direction}\nVisible themes loaded: ${currentVisibleIds.length}\nCurrent position: ${visibleIndex + 1}\nTarget ID: ${targetId || '(none)'}`);
       if (visibleIndex < 0) {
         showFeedback('The theme list changed. It has been refreshed; please click the arrow again.', true);
         return false;
@@ -377,18 +381,18 @@ export function initLessonThemesUI(options = {}) {
           .maybeSingle();
         if (error || !data) {
           await refresh();
-          showFeedback(`Could not save the new order: ${error?.message || 'The database did not update a theme row.'}`, true);
+          showFeedback(`Could not save the new order.\nDatabase error: ${error?.message || '(none)'}\nUpdated row returned: ${data?.id || '(none)'}\nTheme being updated: ${reordered[index].id}`, true);
           return false;
         }
       }
       themes = reordered.map((theme, index) => ({ ...theme, sort_order: index + 1 }));
       saveLessonThemes(themes);
       render();
-      showFeedback('Theme order saved.');
+      showFeedback(`Theme order saved successfully.\nMoved theme: ${id}\nDirection: ${direction}\nRows updated: ${reordered.length}`);
       return true;
     } catch (error) {
       console.error('Could not reorder lesson themes:', error);
-      showFeedback(`Could not reorder themes: ${error?.message || 'Unexpected error.'}`, true);
+      showFeedback(`Unexpected error while reordering.\n${error?.message || String(error)}\n${error?.details || ''}\n${error?.hint || ''}`, true);
       return false;
     }
   }
@@ -529,6 +533,7 @@ export function initLessonThemesUI(options = {}) {
         e.stopPropagation();
         btn.disabled = true;
         const { id, direction } = e.currentTarget.dataset;
+        showFeedback(`Button handler ran.\nTheme ID: ${id}\nDirection: ${direction}\nStarting reorder…`);
         try {
           await moveTheme(id, Number(direction), visibleThemeIds);
         } finally {
