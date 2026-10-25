@@ -205,7 +205,7 @@ export function initLessonThemesUI(options = {}) {
     const knownNames = new Set((data || []).map((theme) => theme.name.trim().toLowerCase()));
     let nextOrder = Math.max(0, ...(data || []).map((theme) => Number(theme.sort_order) || 0)) + 1;
     const userId = getCurrentUser().id;
-    for (const theme of localThemes) {
+    for (const theme of localThemes.filter((item) => String(item.id).startsWith('theme-'))) {
       const normalizedName = theme.name.trim().toLowerCase();
       const defaultTheme = DEFAULT_LESSON_THEMES.find((item) => item.id === theme.id);
       if (defaultTheme && theme.name.trim() !== defaultTheme.name) {
@@ -335,8 +335,13 @@ export function initLessonThemesUI(options = {}) {
       alert('Sign in to your coach account before reordering lesson themes.');
       return false;
     }
-    const visibleIndex = visibleThemeIds.indexOf(id);
-    const targetId = visibleThemeIds[visibleIndex + direction];
+    await refresh();
+    const term = currentSearchTerm.toLowerCase();
+    const currentVisibleIds = themes.filter((theme) =>
+      !term || String(theme.name || '').toLowerCase().includes(term) || String(theme.description || '').toLowerCase().includes(term)
+    ).map((theme) => theme.id);
+    const visibleIndex = currentVisibleIds.indexOf(id);
+    const targetId = currentVisibleIds[visibleIndex + direction];
     if (!targetId) return false;
     const reordered = [...themes];
     const currentIndex = reordered.findIndex((theme) => theme.id === id);
@@ -344,9 +349,13 @@ export function initLessonThemesUI(options = {}) {
     if (currentIndex < 0 || targetIndex < 0) return false;
     [reordered[currentIndex], reordered[targetIndex]] = [reordered[targetIndex], reordered[currentIndex]];
     for (let index = 0; index < reordered.length; index += 1) {
-      const { error } = await supabase.from('lesson_themes').update({ sort_order: index + 1 }).eq('id', reordered[index].id);
-      if (error) {
-        alert(`Could not reorder lesson themes: ${error.message}`);
+      const { data, error } = await supabase.from('lesson_themes')
+        .update({ sort_order: index + 1 })
+        .eq('id', reordered[index].id)
+        .select('id')
+        .maybeSingle();
+      if (error || !data) {
+        alert(`Could not reorder lesson themes: ${error?.message || 'A theme was not found or could not be updated.'}`);
         await refresh();
         return false;
       }
