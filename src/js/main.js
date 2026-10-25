@@ -15,6 +15,7 @@ import { initLessonThemesUI } from './lessonThemes.js';
 import { initPadelLevelsUI } from './padelLevels.js';
 import { initStudentsUI } from './students.js';
 import { initFindPlayersUI } from './findPlayers.js';
+import { initProjectNotesUI } from './projectNotes.js';
 
 // View configurations containing human-readable titles and descriptions
 const VIEW_METADATA = {
@@ -41,6 +42,10 @@ const VIEW_METADATA = {
   settings: {
     title: 'Status',
     subtitle: 'Check Supabase connectivity and the current site deployment.'
+  },
+  readme: {
+    title: 'Leia-me',
+    subtitle: 'Anotações, decisões e informações importantes sobre o projeto.'
   }
 };
 
@@ -50,6 +55,7 @@ let authMode = 'signin'; // 'signin' or 'signup'
 let studentsUI = null;
 let lessonThemesUI = null;
 let findPlayersUI = null;
+let projectNotesUI = null;
 
 function setupCollapsibleTables() {
   document.querySelectorAll('#view-tables > .card:not(.table-controls-card)').forEach((card) => {
@@ -624,6 +630,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         else studentsUI?.refresh();
         checkSupabaseStatus();
         findPlayersUI?.refresh();
+        projectNotesUI?.refresh();
       }, 0);
       console.log(`🔐 Supabase Auth Event: ${event}`, currentUser?.email);
     });
@@ -651,6 +658,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     getCurrentUser: () => currentUser
   });
   await findPlayersUI?.refresh();
+
+  projectNotesUI = initProjectNotesUI({
+    supabase,
+    isSupabaseConfigured,
+    getCurrentUser: () => currentUser
+  });
+  await projectNotesUI?.refresh();
 
   // Initial UI refresh
   updateConnectionUI();

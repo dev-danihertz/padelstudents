@@ -70,6 +70,12 @@
               <span class="nav-label">Status</span>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="#readme" class="nav-link" data-view="readme">
+              <span class="nav-icon" aria-hidden="true">📝</span>
+              <span class="nav-label">Leia-me</span>
+            </a>
+          </li>
         </ul>
       </nav>
 
@@ -652,6 +658,26 @@
                   </div>
                 </div>
                 <p class="text-muted text-xs">This shows when this app build was created. Vercel’s overall platform health is not queried here.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. PROJECT NOTES VIEW -->
+        <section class="view-panel" id="view-readme">
+          <div class="card project-notes-card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Leia-me</h2>
+                <p class="text-muted text-xs">Anote aqui informações, decisões e lembretes importantes sobre este projeto.</p>
+              </div>
+              <span id="project-notes-save-status" class="text-muted text-xs" role="status" aria-live="polite">Loading notes…</span>
+            </div>
+            <div class="card-body project-notes-body">
+              <textarea id="project-notes-text" class="form-control project-notes-textarea" placeholder="Escreva aqui tudo o que quiser guardar sobre o projeto…" aria-label="Anotações do projeto" spellcheck="true"></textarea>
+              <div class="project-notes-footer">
+                <span class="text-muted text-xs">Salvo automaticamente na sua conta quando você parar de digitar.</span>
+                <button type="button" id="btn-save-project-notes" class="btn btn-primary">Save now</button>
               </div>
             </div>
           </div>
