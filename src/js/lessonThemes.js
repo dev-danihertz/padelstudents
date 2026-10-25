@@ -13,8 +13,9 @@
  * - Alterar tema existente (Update / Inline Edit)
  * - Excluir tema (Delete with confirmation)
  * - Search themes in real time
- * - Persistência completa no localStorage
+ * - Local fallback and cache, synchronised with Supabase when configured
  */
+import { supabase as defaultSupabase, isSupabaseConfigured as defaultSupabaseConfigured } from './supabaseClient.js';
 
 export const DEFAULT_LESSON_THEMES = [
   {
@@ -166,7 +167,10 @@ export function resetDefaultThemes() {
 /**
  * Initialises and wires up the Lesson Themes UI
  */
-export function initLessonThemesUI() {
+export function initLessonThemesUI(options = {}) {
+  const supabase = options.supabase || defaultSupabase;
+  const isConfigured = options.isSupabaseConfigured ?? defaultSupabaseConfigured;
+  const getCurrentUser = options.getCurrentUser || (() => null);
   const tableBody = document.getElementById('lesson-themes-table-body');
   const countBadge = document.getElementById('lesson-themes-count-badge');
   const searchInput = document.getElementById('search-lesson-themes');
@@ -174,18 +178,172 @@ export function initLessonThemesUI() {
   const addPanel = document.getElementById('add-theme-form-panel');
   const addForm = document.getElementById('form-create-theme');
   const cancelAddBtn = document.getElementById('btn-cancel-add-theme');
+  let themes = getLessonThemes();
 
   if (!tableBody) return;
 
+  const hasCloudSession = () => Boolean(isConfigured && getCurrentUser()?.id);
+
+  async function refresh() {
+    if (!hasCloudSession()) {
+      themes = getLessonThemes();
+      render();
+      return themes;
+    }
+
+    const selectThemes = () => supabase.from('lesson_themes')
+      .select('id, name, description, status, sort_order, user_id')
+      .order('sort_order', { ascending: true, nullsFirst: false })
+      .order('name');
+    let { data, error } = await selectThemes();
+    if (error) {
+      console.error('Could not load lesson themes from Supabase:', error);
+      return themes;
+    }
+
+    const localThemes = getLessonThemes();
+    const knownNames = new Set((data || []).map((theme) => theme.name.trim().toLowerCase()));
+    let nextOrder = Math.max(0, ...(data || []).map((theme) => Number(theme.sort_order) || 0)) + 1;
+    const userId = getCurrentUser().id;
+    for (const theme of localThemes) {
+      const normalizedName = theme.name.trim().toLowerCase();
+      if (knownNames.has(normalizedName)) continue;
+      const { error: insertError } = await supabase.from('lesson_themes').insert({
+        name: theme.name.trim(),
+        description: theme.description || '',
+        status: theme.status || 'Active',
+        user_id: userId,
+        sort_order: nextOrder
+      });
+      if (insertError) {
+        console.error('Could not sync a locally saved lesson theme to Supabase:', insertError);
+        continue;
+      }
+      knownNames.add(normalizedName);
+      nextOrder += 1;
+    }
+
+    ({ data, error } = await selectThemes());
+    if (error) {
+      console.error('Could not refresh lesson themes from Supabase:', error);
+      return themes;
+    }
+    themes = data || [];
+    saveLessonThemes(themes);
+    render();
+    return themes;
+  }
+
+  async function createTheme(themeData) {
+    if (!isConfigured) {
+      themes = addLessonTheme(themeData);
+      render();
+      return true;
+    }
+    if (!hasCloudSession()) {
+      alert('Sign in to your coach account before saving lesson themes.');
+      return false;
+    }
+    const nextOrder = Math.max(0, ...themes.map((theme) => Number(theme.sort_order) || 0)) + 1;
+    const { data, error } = await supabase.from('lesson_themes').insert({
+      ...themeData,
+      user_id: getCurrentUser().id,
+      sort_order: nextOrder
+    }).select('id, name, description, status, sort_order, user_id').single();
+    if (error) {
+      alert(`Could not save this lesson theme: ${error.message}`);
+      return false;
+    }
+    themes = [...themes, data];
+    saveLessonThemes(themes);
+    render();
+    return true;
+  }
+
+  async function updateTheme(id, updates) {
+    if (!isConfigured) {
+      themes = updateLessonTheme(id, updates);
+      render();
+      return true;
+    }
+    if (!hasCloudSession()) {
+      alert('Sign in to your coach account before editing lesson themes.');
+      return false;
+    }
+    const { data, error } = await supabase.from('lesson_themes').update(updates)
+      .eq('id', id).select('id, name, description, status, sort_order, user_id').single();
+    if (error) {
+      alert(`Could not update this lesson theme: ${error.message}`);
+      return false;
+    }
+    themes = themes.map((theme) => theme.id === id ? data : theme);
+    saveLessonThemes(themes);
+    render();
+    return true;
+  }
+
+  async function removeTheme(id) {
+    if (!isConfigured) {
+      themes = deleteLessonTheme(id);
+      render();
+      return true;
+    }
+    if (!hasCloudSession()) {
+      alert('Sign in to your coach account before deleting lesson themes.');
+      return false;
+    }
+    const { error } = await supabase.from('lesson_themes').delete().eq('id', id);
+    if (error) {
+      alert(`Could not delete this lesson theme: ${error.message}`);
+      return false;
+    }
+    themes = themes.filter((theme) => theme.id !== id);
+    saveLessonThemes(themes);
+    render();
+    return true;
+  }
+
+  async function moveTheme(id, direction, visibleThemeIds) {
+    if (!isConfigured) {
+      themes = moveLessonTheme(id, direction, visibleThemeIds);
+      render();
+      return true;
+    }
+    if (!hasCloudSession()) {
+      alert('Sign in to your coach account before reordering lesson themes.');
+      return false;
+    }
+    const visibleIndex = visibleThemeIds.indexOf(id);
+    const targetId = visibleThemeIds[visibleIndex + direction];
+    if (!targetId) return false;
+    const reordered = [...themes];
+    const currentIndex = reordered.findIndex((theme) => theme.id === id);
+    const targetIndex = reordered.findIndex((theme) => theme.id === targetId);
+    if (currentIndex < 0 || targetIndex < 0) return false;
+    [reordered[currentIndex], reordered[targetIndex]] = [reordered[targetIndex], reordered[currentIndex]];
+    for (let index = 0; index < reordered.length; index += 1) {
+      const { error } = await supabase.from('lesson_themes').update({ sort_order: index + 1 }).eq('id', reordered[index].id);
+      if (error) {
+        alert(`Could not reorder lesson themes: ${error.message}`);
+        await refresh();
+        return false;
+      }
+    }
+    themes = reordered.map((theme, index) => ({ ...theme, sort_order: index + 1 }));
+    saveLessonThemes(themes);
+    render();
+    return true;
+  }
+
   function render() {
-    const allThemes = getLessonThemes();
+    const allThemes = themes;
 
     // Apply filtering
     let filtered = allThemes.filter((theme) => {
       const term = currentSearchTerm.toLowerCase();
       const matchesSearch = !term ||
-        theme.name.toLowerCase().includes(term) ||
-        theme.description.toLowerCase().includes(term);
+        String(theme.name || '').toLowerCase().includes(term) ||
+        String(theme.description || '').toLowerCase().includes(term);
 
       return matchesSearch;
     });
@@ -308,16 +466,15 @@ export function initLessonThemesUI() {
 
     const visibleThemeIds = filtered.map((theme) => theme.id);
     tableBody.querySelectorAll('.btn-move-theme').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const { id, direction } = e.currentTarget.dataset;
-        moveLessonTheme(id, Number(direction), visibleThemeIds);
-        render();
+        await moveTheme(id, Number(direction), visibleThemeIds);
       });
     });
 
     // Wire up inline edit buttons
     tableBody.querySelectorAll('.btn-edit-theme').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const id = e.currentTarget.dataset.id;
         activeEditingThemeId = id;
         render();
@@ -332,7 +489,7 @@ export function initLessonThemesUI() {
 
     // Wire up save buttons
     tableBody.querySelectorAll('.btn-save-theme').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const id = e.currentTarget.dataset.id;
         const safeId = id.replace(/[^a-zA-Z0-9_-]/g, '_');
         const nameInput = document.getElementById(`input-theme-name-${safeId}`);
@@ -350,11 +507,12 @@ export function initLessonThemesUI() {
             return;
           }
 
-          updateLessonTheme(id, {
+          const updated = await updateTheme(id, {
             name: newName,
             description: newDesc,
             status: newStatus
           });
+          if (!updated) return;
         }
 
         activeEditingThemeId = null;
@@ -372,13 +530,14 @@ export function initLessonThemesUI() {
 
     // Wire up delete buttons
     tableBody.querySelectorAll('.btn-delete-theme').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const id = e.currentTarget.dataset.id;
         const name = e.currentTarget.dataset.name;
 
         const confirmMsg = `Are you sure you want to delete the theme "${name}"?\nThis action will remove it from your available coaching themes.`;
         if (window.confirm(confirmMsg)) {
-          deleteLessonTheme(id);
+          const deleted = await removeTheme(id);
+          if (!deleted) return;
           if (activeEditingThemeId === id) {
             activeEditingThemeId = null;
           }
@@ -425,7 +584,7 @@ export function initLessonThemesUI() {
 
   // Hook up Add Form Submission
   if (addForm) {
-    addForm.addEventListener('submit', (e) => {
+    addForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const nameInput = document.getElementById('new-theme-name');
@@ -442,11 +601,12 @@ export function initLessonThemesUI() {
         return;
       }
 
-      addLessonTheme({
+      const created = await createTheme({
         name,
         description,
         status
       });
+      if (!created) return;
 
       // Reset form and close
       addForm.reset();
@@ -460,6 +620,7 @@ export function initLessonThemesUI() {
 
   // Initial render
   render();
+  return { refresh };
 }
 
 /**

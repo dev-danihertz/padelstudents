@@ -47,6 +47,7 @@ const VIEW_METADATA = {
 let currentUser = null;
 let authMode = 'signin'; // 'signin' or 'signup'
 let studentsUI = null;
+let lessonThemesUI = null;
 
 /**
  * Switch the active view based on the given view identifier
@@ -488,7 +489,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventHandlers();
   initTimePeriodsUI();
   initLessonFormatsUI();
-  initLessonThemesUI();
   initPadelLevelsUI();
 
   // Listen for hash changes in URL
@@ -509,10 +509,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     onAuthStateChange((event, session) => {
       currentUser = session?.user || null;
       updateConnectionUI();
-      studentsUI?.refresh();
+      setTimeout(() => {
+        const themesRefresh = lessonThemesUI?.refresh();
+        if (themesRefresh) themesRefresh.then(() => studentsUI?.refresh());
+        else studentsUI?.refresh();
+      }, 0);
       console.log(`🔐 Supabase Auth Event: ${event}`, currentUser?.email);
     });
   }
+
+  lessonThemesUI = initLessonThemesUI({
+    supabase,
+    isSupabaseConfigured,
+    getCurrentUser: () => currentUser
+  });
+  await lessonThemesUI?.refresh();
 
   studentsUI = initStudentsUI({
     supabase,

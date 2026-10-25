@@ -121,10 +121,10 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
             <span>${escapeHtml(theme.name)}</span>
           </label>
         `).join('')
-      : '<p class="text-muted text-xs">No lesson themes are available yet. Add themes in Tables → Lesson Themes.</p>';
+      : '<p class="text-muted text-xs">No lesson themes are available yet. Add themes on the Lesson Themes page.</p>';
   }
 
-  function openForm(student = null) {
+  async function openForm(student = null) {
     editingStudentId = student?.id || null;
     form.reset();
     form.elements.full_name.value = student?.full_name || '';
@@ -138,6 +138,14 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
     form.elements.general_notes.value = student?.general_notes || '';
     form.elements.do_not_send_marketing.checked = student?.do_not_send_marketing === true;
     renderAvailabilityChoices(student?.availability || []);
+    if (isSupabaseConfigured && getCurrentUser()) {
+      const { data, error } = await supabase.from('lesson_themes')
+        .select('id, name, description, status, sort_order').order('sort_order').order('name');
+      if (!error) availableThemes = data || [];
+      else console.error('Could not refresh lesson themes for the student form:', error);
+    } else if (!isSupabaseConfigured) {
+      availableThemes = getLessonThemes();
+    }
     renderCompletedThemeChoices(student?.completedThemes || []);
     document.getElementById('student-modal-title').textContent = editingStudentId ? `Edit ${student.full_name}` : 'Add Student';
     submitButton.textContent = editingStudentId ? 'Save Changes' : 'Save Student';
