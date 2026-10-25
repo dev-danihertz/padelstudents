@@ -160,7 +160,7 @@ function updateConnectionUI() {
   const dashBody = document.getElementById('dashboard-banner-body');
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
   if (!isSupabaseConfigured) {
     // 1. Unconfigured state (No real .env yet)
@@ -178,7 +178,7 @@ function updateConnectionUI() {
     if (settingsDot) settingsDot.className = 'status-dot status-unconfigured';
     if (settingsConnText) settingsConnText.textContent = 'Supabase credentials missing from .env';
     if (settingsConnSubtext) {
-      settingsConnSubtext.innerHTML = 'Create your local <code>.env</code> file with <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code>.';
+      settingsConnSubtext.innerHTML = 'Create your local <code>.env</code> file with <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_PUBLISHABLE_KEY</code>.';
     }
     if (settingsUrl) settingsUrl.textContent = supabaseUrl || 'Missing';
     if (settingsKey) settingsKey.textContent = supabaseKey ? '••••••••' : 'Missing';
@@ -269,7 +269,7 @@ function openAuthModal() {
     window.location.hash = '#settings';
     alert(
       'Supabase Configuration Required:\n\n' +
-      'Please create a .env file with your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY first.\n' +
+      'Please create a .env file with your VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY first.\n' +
       'See the Settings page for full step-by-step instructions.'
     );
     return;
