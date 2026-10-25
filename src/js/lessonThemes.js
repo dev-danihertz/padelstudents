@@ -207,6 +207,28 @@ export function initLessonThemesUI(options = {}) {
     const userId = getCurrentUser().id;
     for (const theme of localThemes) {
       const normalizedName = theme.name.trim().toLowerCase();
+      const defaultTheme = DEFAULT_LESSON_THEMES.find((item) => item.id === theme.id);
+      if (defaultTheme && theme.name.trim() !== defaultTheme.name) {
+        const originalTheme = (data || []).find((item) => item.name.trim().toLowerCase() === defaultTheme.name.toLowerCase());
+        if (originalTheme) {
+          const { data: renamedTheme, error: renameError } = await supabase.from('lesson_themes')
+            .update({
+              name: theme.name.trim(),
+              description: theme.description || '',
+              status: theme.status || 'Active'
+            })
+            .eq('id', originalTheme.id)
+            .select('id, name, description, status, sort_order, user_id')
+            .single();
+          if (!renameError) {
+            data = (data || []).map((item) => item.id === renamedTheme.id ? renamedTheme : item);
+            knownNames.delete(defaultTheme.name.toLowerCase());
+            knownNames.add(normalizedName);
+            continue;
+          }
+          console.error('Could not sync a renamed default theme to Supabase:', renameError);
+        }
+      }
       if (knownNames.has(normalizedName)) continue;
       const { error: insertError } = await supabase.from('lesson_themes').insert({
         name: theme.name.trim(),
