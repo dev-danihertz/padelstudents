@@ -9,7 +9,7 @@
 
 import { supabase, isSupabaseConfigured } from './supabaseClient.js';
 import { signIn, signUp, signOut, getSession, onAuthStateChange } from './auth.js';
-import { initTimePeriodsUI, getAllDays, getTimePeriods } from './availability.js';
+import { initTimePeriodsUI, getAllDays, getTimePeriods, getTimeSlots } from './availability.js';
 import { initLessonFormatsUI } from './lessonFormats.js';
 import { initLessonThemesUI } from './lessonThemes.js';
 import { initPadelLevelsUI } from './padelLevels.js';
@@ -107,14 +107,29 @@ function updateDashboardMetrics(students = []) {
   setText('dashboard-average-level', averageLevel);
 
   const levelDistribution = document.getElementById('dashboard-level-distribution');
-  if (!levelDistribution) return;
   const eligibleStudents = students.filter((student) => ['active', 'occasional'].includes(statusOf(student)));
   const levels = Array.from({ length: 13 }, (_, index) => (index + 2) / 4);
-  levelDistribution.innerHTML = levels.map((level) => {
-    const count = eligibleStudents.filter((student) =>
-      Number(student.min_level) <= level && Number(student.max_level) >= level
-    ).length;
-    return `<div class="level-count-tile"><span class="level-count-label">${Number(level.toFixed(2))}</span><strong>${count}</strong><span class="level-count-caption">${count === 1 ? 'player' : 'players'}</span></div>`;
+  if (levelDistribution) {
+    levelDistribution.innerHTML = levels.map((level) => {
+      const count = eligibleStudents.filter((student) =>
+        Number(student.min_level) <= level && Number(student.max_level) >= level
+      ).length;
+      return `<div class="level-count-tile"><span class="level-count-label">${Number(level.toFixed(2))}</span><strong>${count}</strong><span class="level-count-caption">${count === 1 ? 'player' : 'players'}</span></div>`;
+    }).join('');
+  }
+
+  const bestPeriods = document.getElementById('dashboard-best-periods');
+  if (!bestPeriods) return;
+  const rankedSlots = getTimeSlots().map((slot) => ({
+    ...slot,
+    count: eligibleStudents.filter((student) =>
+      (student.availability || []).some((availability) => availability.time_period === slot.id)
+    ).length
+  })).sort((a, b) => b.count - a.count || a.start.localeCompare(b.start)).slice(0, 5);
+  const maxCount = Math.max(1, ...rankedSlots.map((slot) => slot.count));
+  bestPeriods.innerHTML = rankedSlots.map((slot, index) => {
+    const barWidth = Math.round((slot.count / maxCount) * 100);
+    return `<li class="period-ranking-item"><span class="period-ranking-position">${index + 1}</span><strong class="period-ranking-time">${slot.start}</strong><span class="period-ranking-bar" aria-hidden="true"><span style="width: ${barWidth}%"></span></span><span class="period-ranking-count">${slot.count} ${slot.count === 1 ? 'player' : 'players'}</span></li>`;
   }).join('');
 }
 
