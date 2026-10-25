@@ -29,9 +29,9 @@ const VIEW_METADATA = {
     title: 'Find Compatible Players',
     subtitle: 'Pair players by level compatibility and weekly availability.'
   },
-  lessons: {
-    title: 'Lessons & Sessions',
-    subtitle: 'Schedule and manage 1:1 and group padel sessions.'
+  themes: {
+    title: 'Lesson Themes',
+    subtitle: 'Manage the coaching themes covered in student lessons.'
   },
   tables: {
     title: 'Tables & Schedules',
