@@ -18,6 +18,8 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
   const availabilityGrid = document.getElementById('student-availability-grid');
   const weeklyAvailabilityShortcuts = document.getElementById('weekly-availability-shortcuts');
   const completedThemesGrid = document.getElementById('student-completed-themes');
+  const themeHistoryButton = document.getElementById('btn-view-theme-history');
+  const themeHistoryPanel = document.getElementById('student-theme-history');
   const addButton = document.getElementById('btn-add-student');
   const searchInput = document.getElementById('student-search-input');
   const membershipFilter = document.getElementById('filter-membership');
@@ -125,8 +127,42 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
       : '<p class="text-muted text-xs">No lesson themes are available yet. Add themes on the Lesson Themes page.</p>';
   }
 
+  function formatDateOnly(value) {
+    const [year, month, day] = String(value || '').slice(0, 10).split('-');
+    return year && month && day ? `${day}/${month}/${year}` : 'Date unavailable';
+  }
+
+  async function showThemeHistory() {
+    if (!editingStudentId || !themeHistoryPanel) return;
+    themeHistoryPanel.hidden = false;
+    themeHistoryPanel.innerHTML = '<p class="text-muted text-xs">Loading completion history…</p>';
+    try {
+      let logs = [];
+      if (!isSupabaseConfigured) {
+        const student = readLocalStudents().find((item) => item.id === editingStudentId);
+        logs = student?.completedThemeLogs || [];
+      } else {
+        const { data, error } = await supabase.from('student_lesson_theme_logs')
+          .select('theme_name, completed_on, logged_at')
+          .eq('student_id', editingStudentId)
+          .order('completed_on', { ascending: false })
+          .order('logged_at', { ascending: false });
+        if (error) throw error;
+        logs = data || [];
+      }
+      themeHistoryPanel.innerHTML = logs.length
+        ? `<ul class="student-theme-history-list">${logs.map((entry) => `<li><strong>${escapeHtml(entry.theme_name)}</strong><time datetime="${escapeHtml(entry.completed_on)}">${formatDateOnly(entry.completed_on)}</time></li>`).join('')}</ul>`
+        : '<p class="text-muted text-xs">No completed themes have been logged for this student yet.</p>';
+    } catch (error) {
+      themeHistoryPanel.innerHTML = `<p class="student-feedback-error" role="alert">Could not load history: ${escapeHtml(error.message || error)}</p>`;
+    }
+  }
+
   async function openForm(student = null) {
     editingStudentId = student?.id || null;
+    themeHistoryPanel.hidden = true;
+    themeHistoryPanel.innerHTML = '';
+    themeHistoryButton.disabled = !editingStudentId;
     form.reset();
     form.elements.full_name.value = student?.full_name || '';
     form.elements.phone.value = student?.phone || '';
@@ -329,12 +365,29 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
     try {
       if (!isSupabaseConfigured) {
         const localStudents = readLocalStudents();
+        const today = new Date();
+        const completedOn = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         if (editingStudentId) {
           const index = localStudents.findIndex((student) => student.id === editingStudentId);
           if (index === -1) throw new Error('This student record could not be found in local storage.');
-          localStudents[index] = { ...localStudents[index], ...studentFields, availability: selectedSlots, completedThemes: selectedThemeIds };
+          const existingStudent = localStudents[index];
+          const newlyCompleted = selectedThemeIds.filter((id) => !(existingStudent.completedThemes || []).includes(id));
+          const newLogs = newlyCompleted.map((id) => ({
+            lesson_theme_id: id,
+            theme_name: availableThemes.find((theme) => theme.id === id)?.name || 'Deleted theme',
+            completed_on: completedOn
+          }));
+          localStudents[index] = {
+            ...existingStudent, ...studentFields, availability: selectedSlots, completedThemes: selectedThemeIds,
+            completedThemeLogs: [...(existingStudent.completedThemeLogs || []), ...newLogs]
+          };
         } else {
-          localStudents.push({ id: crypto.randomUUID(), ...studentFields, availability: selectedSlots, completedThemes: selectedThemeIds, created_at: new Date().toISOString() });
+          const completedThemeLogs = selectedThemeIds.map((id) => ({
+            lesson_theme_id: id,
+            theme_name: availableThemes.find((theme) => theme.id === id)?.name || 'Deleted theme',
+            completed_on: completedOn
+          }));
+          localStudents.push({ id: crypto.randomUUID(), ...studentFields, availability: selectedSlots, completedThemes: selectedThemeIds, completedThemeLogs, created_at: new Date().toISOString() });
         }
         saveLocalStudents(localStudents);
       } else if (editingStudentId) {
@@ -410,6 +463,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
     window.location.hash = '#students';
     openForm();
   });
+  themeHistoryButton.addEventListener('click', showThemeHistory);
   document.getElementById('close-student-modal').addEventListener('click', closeForm);
   document.getElementById('cancel-student-form').addEventListener('click', closeForm);
   modal.addEventListener('click', (event) => { if (event.target === modal) closeForm(); });
