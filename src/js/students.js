@@ -254,7 +254,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
     document.getElementById('active-count-label').textContent = String(students.filter((student) => student.student_status !== 'archived').length);
     document.getElementById('archived-count-label').textContent = String(students.filter((student) => student.student_status === 'archived').length);
     if (!filtered.length) {
-      tableBody.innerHTML = `<tr><td colspan="5" class="student-empty-state">${students.length ? 'No students match these filters.' : 'No student records yet. Select “+ Add Student” to create the first record.'}</td></tr>`;
+      tableBody.innerHTML = `<tr class="student-empty-row"><td colspan="5" class="student-empty-state">${students.length ? 'No students match these filters.' : 'No student records yet. Select “+ Add Student” to create the first record.'}</td></tr>`;
       return;
     }
 
@@ -264,11 +264,11 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
       const membershipClass = student.membership_status === 'member' ? 'badge-member' : student.membership_status === 'non-member' ? 'badge-non-member' : 'badge-unknown';
       const statusClass = status === 'active' ? 'badge-status-active' : status === 'occasional' ? 'badge-status-occasional' : 'badge-status-inactive';
       return `<tr>
-        <td><button type="button" class="student-name-link btn-edit-student" data-id="${escapeHtml(student.id)}" aria-label="Edit ${escapeHtml(student.full_name)}">${escapeHtml(student.full_name)}</button></td>
-        <td><span class="badge ${membershipClass}">${membershipLabel}</span></td>
-        <td><span class="level-pill">${Number(student.current_level || 0).toFixed(2)}</span></td>
-        <td><span class="range-text">${Number(student.min_level || 0).toFixed(2)} – ${Number(student.max_level || 0).toFixed(2)}</span></td>
-        <td><span class="badge ${statusClass}">${STATUS_LABELS[status] || escapeHtml(status)}</span></td>
+        <td class="student-name-cell"><button type="button" class="student-name-link btn-edit-student" data-id="${escapeHtml(student.id)}" aria-label="Edit ${escapeHtml(student.full_name)}">${escapeHtml(student.full_name)}</button></td>
+        <td data-label="Membership"><span class="badge ${membershipClass}">${membershipLabel}</span></td>
+        <td data-label="Level"><span class="level-pill">${Number(student.current_level || 0).toFixed(2)}</span></td>
+        <td data-label="Acceptable Group Range"><span class="range-text">${Number(student.min_level || 0).toFixed(2)} – ${Number(student.max_level || 0).toFixed(2)}</span></td>
+        <td data-label="Status"><span class="badge ${statusClass}">${STATUS_LABELS[status] || escapeHtml(status)}</span></td>
       </tr>`;
     }).join('');
 
