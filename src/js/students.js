@@ -11,7 +11,7 @@ const STATUS_LABELS = {
   archived: 'Archived'
 };
 
-export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser, getAllDays, getTimePeriods }) {
+export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser, getAllDays, getTimePeriods, onStudentsUpdated }) {
   const tableBody = document.getElementById('students-table-body');
   const modal = document.getElementById('student-modal');
   const form = document.getElementById('student-form');
@@ -255,6 +255,7 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
     const filtered = visibleStudents();
     document.getElementById('active-count-label').textContent = String(students.filter((student) => student.student_status !== 'archived').length);
     document.getElementById('archived-count-label').textContent = String(students.filter((student) => student.student_status === 'archived').length);
+    onStudentsUpdated?.(students);
     if (!filtered.length) {
       tableBody.innerHTML = `<tr class="student-empty-row"><td colspan="5" class="student-empty-state">${students.length ? 'No students match these filters.' : 'No student records yet. Select “+ Add Student” to create the first record.'}</td></tr>`;
       return;

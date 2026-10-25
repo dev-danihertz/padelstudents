@@ -86,10 +86,45 @@ function navigateTo(viewId) {
   if (subtitleEl) subtitleEl.textContent = meta.subtitle;
 
   // 4. Update browser document title
-  document.title = `${meta.title} | Padel Coach CRM`;
+  document.title = `🎾 ${meta.title} | Padel Coach CRM`;
 
   // 5. If mobile sidebar is open, close it on navigation
   closeMobileSidebar();
+}
+
+function updateDashboardMetrics(students = []) {
+  const setText = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = String(value);
+  };
+  const statusOf = (student) => student.student_status || 'active';
+  const roster = students.filter((student) => statusOf(student) !== 'archived');
+  const active = students.filter((student) => statusOf(student) === 'active');
+  const occasional = students.filter((student) => statusOf(student) === 'occasional');
+  const archived = students.filter((student) => statusOf(student) === 'archived');
+  const members = roster.filter((student) => student.membership_status === 'member').length;
+  const optedOut = roster.filter((student) => student.do_not_send_marketing === true).length;
+  const averageLevel = roster.length
+    ? (roster.reduce((sum, student) => sum + Number(student.current_level || 0), 0) / roster.length).toFixed(2)
+    : '—';
+  const withAvailability = roster.filter((student) => ['active', 'occasional'].includes(statusOf(student)) && (student.availability || []).length > 0).length;
+  const availabilityRoster = active.length + occasional.length;
+  const availabilityPercent = availabilityRoster ? Math.round((withAvailability / availabilityRoster) * 100) : 0;
+
+  setText('dashboard-active-count', active.length);
+  setText('dashboard-member-count', members);
+  setText('dashboard-average-level', averageLevel);
+  setText('dashboard-opt-out-count', optedOut);
+  setText('dashboard-status-active', active.length);
+  setText('dashboard-status-occasional', occasional.length);
+  setText('dashboard-status-archived', archived.length);
+  setText('dashboard-availability-count', `${withAvailability} of ${availabilityRoster}`);
+  const progress = document.getElementById('dashboard-availability-progress');
+  if (progress) {
+    progress.setAttribute('aria-valuenow', String(availabilityPercent));
+    const bar = progress.querySelector('span');
+    if (bar) bar.style.width = `${availabilityPercent}%`;
+  }
 }
 
 /**
@@ -470,7 +505,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     isSupabaseConfigured,
     getCurrentUser: () => currentUser,
     getAllDays,
-    getTimePeriods
+    getTimePeriods,
+    onStudentsUpdated: updateDashboardMetrics
   });
 
   // Initial UI refresh

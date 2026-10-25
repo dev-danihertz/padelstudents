@@ -135,10 +135,8 @@
                 <span class="metric-title">Active Students</span>
                 <span class="metric-icon">🎾</span>
               </div>
-              <div class="metric-value">28</div>
-              <div class="metric-footer text-positive">
-                <span>&uarr; 3 new this month</span>
-              </div>
+              <div class="metric-value" id="dashboard-active-count">0</div>
+              <div class="metric-footer text-muted"><span>Current active roster</span></div>
             </div>
 
             <div class="metric-card">
@@ -146,10 +144,8 @@
                 <span class="metric-title">Club Members</span>
                 <span class="metric-icon">🏷️</span>
               </div>
-              <div class="metric-value">19</div>
-              <div class="metric-footer text-muted">
-                <span>68% of active roster</span>
-              </div>
+              <div class="metric-value" id="dashboard-member-count">0</div>
+              <div class="metric-footer text-muted"><span>Students marked as club members</span></div>
             </div>
 
             <div class="metric-card">
@@ -157,21 +153,17 @@
                 <span class="metric-title">Average Playing Level</span>
                 <span class="metric-icon">📈</span>
               </div>
-              <div class="metric-value">2.75</div>
-              <div class="metric-footer text-muted">
-                <span>Range: 1.5 &ndash; 4.5</span>
-              </div>
+              <div class="metric-value" id="dashboard-average-level">&mdash;</div>
+              <div class="metric-footer text-muted"><span>Average of non-archived students</span></div>
             </div>
 
             <div class="metric-card">
               <div class="metric-header">
-                <span class="metric-title">Follow-ups Due</span>
-                <span class="metric-icon">⏰</span>
+                <span class="metric-title">Do Not Contact</span>
+                <span class="metric-icon">🔴</span>
               </div>
-              <div class="metric-value">4</div>
-              <div class="metric-footer text-warning">
-                <span>Action required this week</span>
-              </div>
+              <div class="metric-value" id="dashboard-opt-out-count">0</div>
+              <div class="metric-footer text-warning"><span>Students opted out of marketing</span></div>
             </div>
           </div>
 
@@ -208,32 +200,24 @@
 
             <div class="card">
               <div class="card-header">
-                <h2 class="card-title">Development Roadmap</h2>
+                <h2 class="card-title">Roster Snapshot</h2>
               </div>
               <div class="card-body">
-                <ul class="roadmap-list">
-                  <li class="roadmap-item completed">
-                    <span class="roadmap-icon">✓</span>
-                    <div>
-                      <strong>Phase 1: Project Foundation</strong>
-                      <p>Vite dev server, responsive CRM shell, and British English UI.</p>
-                    </div>
-                  </li>
-                  <li class="roadmap-item pending">
-                    <span class="roadmap-icon">2</span>
-                    <div>
-                      <strong>Phase 2: Supabase Cloud Database (In Progress)</strong>
-                      <p>PostgreSQL schema migrations, Row Level Security, and secure API keys.</p>
-                    </div>
-                  </li>
-                  <li class="roadmap-item pending">
-                    <span class="roadmap-icon">3</span>
-                    <div>
-                      <strong>Phase 3: Student Management (In Progress)</strong>
-                      <p>Student records, search, and per-student weekly availability.</p>
-                    </div>
-                  </li>
-                </ul>
+                <dl class="dashboard-roster-stats">
+                  <div><dt>Active</dt><dd id="dashboard-status-active">0</dd></div>
+                  <div><dt>Occasional</dt><dd id="dashboard-status-occasional">0</dd></div>
+                  <div><dt>Archived</dt><dd id="dashboard-status-archived">0</dd></div>
+                </dl>
+                <div class="dashboard-availability">
+                  <div class="dashboard-availability-heading">
+                    <strong>Weekly availability recorded</strong>
+                    <span id="dashboard-availability-count">0 of 0</span>
+                  </div>
+                  <div class="dashboard-progress-track" role="progressbar" aria-label="Students with weekly availability" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dashboard-availability-progress">
+                    <span></span>
+                  </div>
+                  <p class="text-muted text-xs">Active and occasional students with at least one time slot selected.</p>
+                </div>
               </div>
             </div>
           </div>
