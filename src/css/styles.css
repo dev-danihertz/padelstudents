@@ -1626,6 +1626,51 @@ button, input, select {
     padding: 1.25rem !important;
   }
 
+  .student-data-table tbody tr:not(.student-empty-row) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0.4rem 0.5rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .student-data-table tbody td:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .student-data-table .student-name-link {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .student-data-table tbody td:nth-child(2),
+  .student-data-table tbody td:nth-child(4),
+  .student-data-table tbody td:nth-child(5) {
+    display: none;
+  }
+
+  .student-data-table tbody td:nth-child(3) {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .student-data-table tbody td:nth-child(3)::before {
+    display: none;
+  }
+
+  .student-data-table .level-pill {
+    white-space: nowrap;
+  }
+
   .table-footer {
     padding: 0.75rem;
   }
