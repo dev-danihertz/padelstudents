@@ -49,6 +49,39 @@ let authMode = 'signin'; // 'signin' or 'signup'
 let studentsUI = null;
 let lessonThemesUI = null;
 
+function setupCollapsibleTables() {
+  document.querySelectorAll('#view-tables > .card:not(.table-controls-card)').forEach((card) => {
+    const header = card.querySelector(':scope > .card-header');
+    if (!header || card.dataset.collapsibleReady === 'true') return;
+
+    card.dataset.collapsibleReady = 'true';
+    const content = [...card.children].filter((child) => child !== header);
+    content.forEach((element) => { element.hidden = true; });
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'btn btn-sm btn-secondary';
+    toggle.textContent = '＋ Show table';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', `Show ${header.querySelector('.card-title')?.textContent || 'table'}`);
+    toggle.style.flexShrink = '0';
+    toggle.addEventListener('click', () => {
+      setTableCardExpanded(card, content, toggle, card.dataset.expanded !== 'true');
+    });
+    header.append(toggle);
+    card._tableContent = content;
+    card._tableToggle = toggle;
+    card.dataset.expanded = 'false';
+  });
+}
+
+function setTableCardExpanded(card, content, toggle, expanded) {
+  content.forEach((element) => { element.hidden = !expanded; });
+  card.dataset.expanded = String(expanded);
+  toggle.textContent = expanded ? '− Hide table' : '＋ Show table';
+  toggle.setAttribute('aria-expanded', String(expanded));
+}
+
 /**
  * Switch the active view based on the given view identifier
  * @param {string} viewId - e.g., 'dashboard', 'students', 'find-players', 'tables'
@@ -471,6 +504,10 @@ function setupEventHandlers() {
       const targetId = btn.dataset.scrollTo;
       const targetEl = document.getElementById(targetId);
       if (targetEl) {
+        const card = targetEl.closest('#view-tables > .card');
+        if (card?.dataset.collapsibleReady === 'true' && card.dataset.expanded !== 'true') {
+          setTableCardExpanded(card, card._tableContent, card._tableToggle, true);
+        }
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         if (btn.parentElement) {
           btn.parentElement.querySelectorAll('.tab-button').forEach((b) => b.classList.remove('active'));
@@ -490,6 +527,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTimePeriodsUI();
   initLessonFormatsUI();
   initPadelLevelsUI();
+  setupCollapsibleTables();
 
   // Listen for hash changes in URL
   window.addEventListener('hashchange', handleHashChange);
