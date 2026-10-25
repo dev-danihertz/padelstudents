@@ -502,22 +502,6 @@
             </div>
           </div>
 
-          <!-- Relational Database Context Card -->
-          <div class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-body">
-              <h3 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 0.5rem;">
-                🔗 Database Mapping: <code>student_availability</code>
-              </h3>
-              <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem;">
-                When a student selects their availability in their profile, each checked box creates a record in your Supabase PostgreSQL table:
-              </p>
-              <div style="background-color: var(--neutral-bg); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-family: monospace; font-size: 0.825rem; color: var(--primary-900);">
-                INSERT INTO public.student_availability (student_id, day_of_week, time_period)<br>
-                VALUES ('d3b07384-...', 'wednesday', '09:00');
-              </div>
-            </div>
-          </div>
-
           <!-- Lesson Formats Table (1:1, 1:2, 1:3, 1:4, 1:5+) -->
           <div class="card" id="card-lesson-formats" style="margin-bottom: 1.5rem;">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
@@ -545,22 +529,6 @@
                   <!-- Populated dynamically via JavaScript with live inline editing -->
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          <!-- Relational Database Context Card for Lesson Preferences -->
-          <div class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-body">
-              <h3 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 0.5rem;">
-                🔗 Database Mapping: <code>student_lesson_preferences</code>
-              </h3>
-              <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem;">
-                When a student selects multiple acceptable formats (e.g. 1:1 and 1:3), each selection creates a row in the relational preferences table:
-              </p>
-              <div style="background-color: var(--neutral-bg); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-family: monospace; font-size: 0.825rem; color: var(--primary-900);">
-                INSERT INTO public.student_lesson_preferences (student_id, lesson_format)<br>
-                VALUES ('d3b07384-...', '1:3');
-              </div>
             </div>
           </div>
 
@@ -603,22 +571,6 @@
             </div>
           </div>
 
-          <!-- Relational Database Context Card for Levels -->
-          <div class="card">
-            <div class="card-body">
-              <h3 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 0.5rem;">
-                🔗 Database Mapping: <code>students.current_level</code>, <code>min_level</code> &amp; <code>max_level</code>
-              </h3>
-              <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem;">
-                Student levels are stored with <code>NUMERIC(4, 2)</code> precision in Supabase PostgreSQL, enforcing range overlap checks for group matching:
-              </p>
-              <div style="background-color: var(--neutral-bg); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light); font-family: monospace; font-size: 0.825rem; color: var(--primary-900);">
-                UPDATE public.students<br>
-                SET current_level = 2.75, min_level = 2.50, max_level = 3.25<br>
-                WHERE id = 'd3b07384-...';
-              </div>
-            </div>
-          </div>
         </section>
 
         <!-- 6. SETTINGS VIEW -->
