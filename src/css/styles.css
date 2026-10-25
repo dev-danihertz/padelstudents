@@ -1541,6 +1541,20 @@ button, input, select {
   accent-color: var(--accent-600);
 }
 
+.completed-theme-number {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: 2rem;
+  justify-content: center;
+  padding: 0.05rem 0.3rem;
+  border-radius: var(--radius-full);
+  background: var(--accent-100);
+  color: var(--accent-600);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .student-feedback-error {
   color: var(--danger-text);
 }

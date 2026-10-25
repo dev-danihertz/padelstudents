@@ -411,7 +411,7 @@ export function initLessonThemesUI(options = {}) {
         if (isEditing) {
           return `
             <tr style="background-color: var(--accent-50);">
-              <td class="theme-order-cell">${orderNumber}</td>
+              <td class="theme-order-cell">#${orderNumber}</td>
               <td>
                 <input 
                   type="text" 
@@ -455,7 +455,7 @@ export function initLessonThemesUI(options = {}) {
 
         return `
           <tr data-theme-id="${theme.id}">
-            <td class="theme-order-cell">${orderNumber}</td>
+            <td class="theme-order-cell">#${orderNumber}</td>
             <td style="width: 28%;">
               <strong>${escapeHtml(theme.name)}</strong>
             </td>

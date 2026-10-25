@@ -115,9 +115,10 @@ export function initStudentsUI({ supabase, isSupabaseConfigured, getCurrentUser,
   function renderCompletedThemeChoices(selected = []) {
     const selectedIds = new Set(selected);
     completedThemesGrid.innerHTML = availableThemes.length
-      ? availableThemes.map((theme) => `
+      ? availableThemes.map((theme, index) => `
           <label class="completed-theme-choice">
             <input type="checkbox" name="completed_themes" value="${escapeHtml(theme.id)}" ${selectedIds.has(theme.id) ? 'checked' : ''}>
+            <span class="completed-theme-number">#${index + 1}</span>
             <span>${escapeHtml(theme.name)}</span>
           </label>
         `).join('')
