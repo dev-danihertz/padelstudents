@@ -103,8 +103,16 @@ function updateDashboardMetrics(students = []) {
   const averageLevel = roster.length
     ? (roster.reduce((sum, student) => sum + Number(student.current_level || 0), 0) / roster.length).toFixed(2)
     : '—';
+  const now = Date.now();
+  const countCreatedWithinDays = (days) => students.filter((student) => {
+    const createdAt = Date.parse(student.created_at || '');
+    const cutoff = now - days * 24 * 60 * 60 * 1000;
+    return Number.isFinite(createdAt) && createdAt >= cutoff && createdAt <= now;
+  }).length;
   setText('dashboard-active-count', active.length);
   setText('dashboard-average-level', averageLevel);
+  setText('dashboard-added-7-days', countCreatedWithinDays(7));
+  setText('dashboard-added-30-days', countCreatedWithinDays(30));
 
   const levelDistribution = document.getElementById('dashboard-level-distribution');
   const eligibleStudents = students.filter((student) => ['active', 'occasional'].includes(statusOf(student)));
